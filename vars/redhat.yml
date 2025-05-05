@@ -1,0 +1,14 @@
+---
+# =============================================================================
+# Ansible Role: OpenSSH - RedHat OS Family Variables
+# =============================================================================
+# This file contains OS-specific variables for RedHat-based systems.
+# =============================================================================
+
+# Package names
+openssh_packages:
+  - openssh-server
+  - openssh-clients
+
+# Service name
+openssh_service_name: sshd

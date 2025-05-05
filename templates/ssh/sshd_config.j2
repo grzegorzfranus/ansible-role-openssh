@@ -1,0 +1,192 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+{{ ansible_managed | comment }}
+
+# =============================================================================
+# SSH Server Configuration
+# =============================================================================
+# This file is managed by Ansible - manual changes will be overwritten
+# Security-hardened configuration with secure defaults
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Core Settings
+# -----------------------------------------------------------------------------
+# Basic daemon configuration parameters
+{% if openssh_port is defined %}
+Port {{ openssh_port }}
+{% endif %}
+
+{% if openssh_protocol is defined %}
+Protocol {{ openssh_protocol }}
+{% endif %}
+
+# Listen addresses (empty list means listen on all interfaces)
+{% if openssh_listen_addresses is defined and openssh_listen_addresses|length > 0 %}
+{% for address in openssh_listen_addresses %}
+ListenAddress {{ address }}
+{% endfor %}
+{% endif %}
+
+# -----------------------------------------------------------------------------
+# Host Key Files
+# -----------------------------------------------------------------------------
+# Server identity key files
+{% for key in openssh_host_keys %}
+HostKey {{ key }}
+{% endfor %}
+
+# -----------------------------------------------------------------------------
+# Logging
+# -----------------------------------------------------------------------------
+# Logging configuration for security monitoring
+SyslogFacility {{ openssh_syslog_facility }}
+LogLevel {{ openssh_log_level }}
+
+# -----------------------------------------------------------------------------
+# Authentication
+# -----------------------------------------------------------------------------
+# Authentication method configuration
+PasswordAuthentication {{ 'yes' if openssh_password_authentication else 'no' }}
+PubkeyAuthentication {{ 'yes' if openssh_pubkey_authentication else 'no' }}
+HostbasedAuthentication {{ 'yes' if openssh_host_based_auth else 'no' }}
+ChallengeResponseAuthentication {{ 'yes' if openssh_challenge_response_auth else 'no' }}
+
+# Public key file location
+{% if openssh_authorized_keys_file is defined %}
+AuthorizedKeysFile {{ openssh_authorized_keys_file }}
+{% endif %}
+
+# Root account security
+PermitRootLogin {{ openssh_permit_root_login }}
+
+# Password security
+PermitEmptyPasswords {{ 'yes' if openssh_permit_empty_passwords else 'no' }}
+
+# Brute force protection
+MaxAuthTries {{ openssh_max_auth_tries }}
+
+# Session security
+LoginGraceTime {{ openssh_login_grace_time }}
+
+# Legacy authentication security
+IgnoreRhosts {{ 'yes' if openssh_ignore_rhosts else 'no' }}
+
+# Environment security
+PermitUserEnvironment {{ 'yes' if openssh_permit_user_environment else 'no' }}
+
+# -----------------------------------------------------------------------------
+# Security
+# -----------------------------------------------------------------------------
+# File permission checking
+StrictModes {{ 'yes' if openssh_strict_modes else 'no' }}
+
+# Cryptographic settings for secure communications
+{% if openssh_ciphers is defined and openssh_ciphers|length > 0 %}
+Ciphers {{ openssh_ciphers | join(',') }}
+{% endif %}
+
+{% if openssh_macs is defined and openssh_macs|length > 0 %}
+MACs {{ openssh_macs | join(',') }}
+{% endif %}
+
+{% if openssh_kex_algorithms is defined and openssh_kex_algorithms|length > 0 %}
+KexAlgorithms {{ openssh_kex_algorithms | join(',') }}
+{% endif %}
+
+{% if openssh_host_key_algorithms is defined and openssh_host_key_algorithms|length > 0 %}
+HostKeyAlgorithms {{ openssh_host_key_algorithms | join(',') }}
+{% endif %}
+
+# Authentication integration
+UsePAM {{ 'yes' if openssh_use_pam else 'no' }}
+
+# -----------------------------------------------------------------------------
+# Forwarding and Tunneling
+# -----------------------------------------------------------------------------
+# Control data forwarding (all disabled by default for security)
+X11Forwarding {{ 'yes' if openssh_x11_forwarding else 'no' }}
+AllowAgentForwarding {{ 'yes' if openssh_agent_forwarding else 'no' }}
+AllowTcpForwarding {{ 'yes' if openssh_tcp_forwarding else 'no' }}
+PermitTunnel {{ 'yes' if openssh_permit_tunnel else 'no' }}
+GatewayPorts {{ 'yes' if openssh_gateway_ports else 'no' }}
+
+# Global forwarding control (supersedes individual settings)
+DisableForwarding {{ 'yes' if openssh_disable_forwarding else 'no' }}
+
+# -----------------------------------------------------------------------------
+# Connection Settings
+# -----------------------------------------------------------------------------
+# Performance and resource control
+Compression {{ openssh_compression }}
+
+# Session timeouts for security
+ClientAliveInterval {{ openssh_client_alive_interval }}
+ClientAliveCountMax {{ openssh_client_alive_count_max }}
+
+# Connection limits to prevent resource exhaustion
+MaxSessions {{ openssh_max_sessions }}
+MaxStartups {{ openssh_max_startups }}
+
+# -----------------------------------------------------------------------------
+# Network Settings
+# -----------------------------------------------------------------------------
+# DNS configuration
+UseDNS {{ 'yes' if openssh_use_dns else 'no' }}
+
+# IP version control
+AddressFamily {{ openssh_address_family }}
+
+# Environment variables passed from client to server
+{% if openssh_accept_env is defined and openssh_accept_env|length > 0 %}
+{% for env in openssh_accept_env %}
+AcceptEnv {{ env }}
+{% endfor %}
+{% endif %}
+
+# -----------------------------------------------------------------------------
+# User Access Controls
+# -----------------------------------------------------------------------------
+# User/group access restrictions
+{% if openssh_allow_users is defined and openssh_allow_users|length > 0 %}
+AllowUsers {{ openssh_allow_users | join(' ') }}
+{% endif %}
+
+{% if openssh_allow_groups is defined and openssh_allow_groups|length > 0 %}
+AllowGroups {{ openssh_allow_groups | join(' ') }}
+{% endif %}
+
+{% if openssh_deny_users is defined and openssh_deny_users|length > 0 %}
+DenyUsers {{ openssh_deny_users | join(' ') }}
+{% endif %}
+
+{% if openssh_deny_groups is defined and openssh_deny_groups|length > 0 %}
+DenyGroups {{ openssh_deny_groups | join(' ') }}
+{% endif %}
+
+# -----------------------------------------------------------------------------
+# Banner and MOTD
+# -----------------------------------------------------------------------------
+# Login information displays
+PrintMotd {{ 'yes' if openssh_print_motd else 'no' }}
+PrintLastLog {{ 'yes' if openssh_print_last_log else 'no' }}
+
+# Security warning banner
+{% if openssh_banner_path is defined %}
+Banner {{ openssh_banner_path }}
+{% endif %}
+
+# -----------------------------------------------------------------------------
+# Include additional configuration files
+# -----------------------------------------------------------------------------
+# Load modular configuration from the config directory
+Include {{ openssh_sshd_config_dir }}/*.conf
+
+# -----------------------------------------------------------------------------
+# Custom Options
+# -----------------------------------------------------------------------------
+# Additional custom configuration options
+{% if openssh_custom_options is defined and openssh_custom_options|length > 0 %}
+{% for option in openssh_custom_options %}
+{{ option }}
+{% endfor %}
+{% endif %}

@@ -1,0 +1,14 @@
+---
+# =============================================================================
+# Ansible Role: OpenSSH - Debian OS Family Variables
+# =============================================================================
+# This file contains OS-specific variables for Debian-based systems.
+# =============================================================================
+
+# Package names
+openssh_packages:
+  - openssh-server
+  - openssh-client
+
+# Service name
+openssh_service_name: ssh

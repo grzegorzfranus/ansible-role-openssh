@@ -1,0 +1,38 @@
+#jinja2: trim_blocks: True, lstrip_blocks: True
+{{ ansible_managed | comment }}
+
+# =============================================================================
+# SSH Client Configuration
+# =============================================================================
+# This file is managed by Ansible - manual changes will be overwritten
+# =============================================================================
+
+# Global Defaults - applied to all hosts unless overridden in a Host section
+Host *
+    # Connection settings
+    ConnectionAttempts {{ openssh_client_settings.connection_attempts }}
+    ConnectTimeout {{ openssh_client_settings.connect_timeout }}
+    ServerAliveInterval {{ openssh_client_settings.server_alive_interval }}
+    ServerAliveCountMax {{ openssh_client_settings.server_alive_count_max }}
+    
+    # Security settings
+    CheckHostIP {{ 'yes' if openssh_client_settings.check_host_ip else 'no' }}
+    StrictHostKeyChecking {{ openssh_client_settings.strict_host_key_checking }}
+    UpdateHostKeys {{ openssh_client_settings.update_host_keys }}
+    VerifyHostKeyDNS {{ openssh_client_settings.verify_host_key_dns }}
+    
+    # Forwarding settings
+    ForwardAgent {{ 'yes' if openssh_client_settings.forward_agent else 'no' }}
+    ForwardX11 {{ 'yes' if openssh_client_settings.forward_x11 else 'no' }}
+    
+    # Host key storage
+    GlobalKnownHostsFile {{ openssh_client_settings.global_known_hosts_file }}
+    UserKnownHostsFile {{ openssh_client_settings.user_known_hosts_file }}
+    
+    # Environment Variables to send to server
+{% for env in openssh_client_settings.send_env %}
+    SendEnv {{ env }}
+{% endfor %}
+
+# Include any additional configuration files
+Include /etc/ssh/ssh_config.d/*.conf

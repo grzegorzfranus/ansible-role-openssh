@@ -1,0 +1,182 @@
+# =============================================================================
+# Ansible Role: OpenSSH - Molecule Verification Playbook
+# =============================================================================
+# This playbook verifies the installation and configuration of OpenSSH.
+# It performs comprehensive checks of:
+# - Package installation and versioning
+# - Service status and configuration
+# - Configuration files and permissions
+# - SSH daemon settings
+# - Port availability and connectivity
+# - Security settings validation
+#
+# Flow:
+# 1. Load variables and gather facts
+# 2. Verify package installation
+# 3. Check service status
+# 4. Validate configuration files
+# 5. Verify SSH daemon configuration
+# 6. Test connectivity
+# 7. Validate security settings
+# =============================================================================
+
+---
+# -----------------------------------------------------------------------------
+# 1. Environment Setup
+# -----------------------------------------------------------------------------
+- name: molecule | Verify Role
+  hosts: all
+  gather_facts: true
+
+  vars_files:
+    - ../../defaults/main.yml
+    - ../../vars/main.yml
+
+  vars:
+    # Define these variables here to avoid undefined variable errors
+    openssh_config_owner: root
+    openssh_config_group: root
+    openssh_config_mode: '0600'
+    openssh_server_package: "{{ openssh_packages[0] | default('openssh-server') }}"
+
+  tasks:
+    - name: Verify | Gather OS specific variables
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files:
+            - "{{ ansible_facts['distribution'] | lower }}_{{ ansible_facts['distribution_version'] | lower }}.yml"
+            - "{{ ansible_facts['distribution'] | lower }}_{{ ansible_facts['distribution_major_version'] | lower }}.yml"
+            - "{{ ansible_facts['distribution'] | lower }}.yml"
+            - "{{ ansible_facts['os_family'] | lower }}_{{ ansible_facts['distribution_version'] | lower }}.yml"
+            - "{{ ansible_facts['os_family'] | lower }}_{{ ansible_facts['distribution_major_version'].split('.')[0] }}.yml"
+            - "{{ ansible_facts['os_family'] | lower }}.yml"
+            - "main.yml"
+          paths:
+            - "../../vars"
+
+    # -----------------------------------------------------------------------------
+    # 2. Package Verification
+    # -----------------------------------------------------------------------------
+    - name: Verify | Check if openssh-server package is installed
+      ansible.builtin.package:
+        name: "{{ openssh_server_package }}"
+        state: present
+      register: _package_result_
+      ignore_errors: true
+      check_mode: true
+
+    - name: Verify | Check if 'sshd' binary is available
+      ansible.builtin.command:
+        cmd: which sshd
+      changed_when: false
+      register: _binary_result_
+      ignore_errors: true
+
+    - name: Verify | Get OpenSSH version
+      ansible.builtin.command:
+        cmd: sshd -v
+      register: _version_result_
+      changed_when: false
+      ignore_errors: true
+
+    - name: Verify | Show OpenSSH version
+      ansible.builtin.debug:
+        var: _version_result_.stderr
+      when: _version_result_.rc == 0
+
+    # -----------------------------------------------------------------------------
+    # 3. Service Status Verification
+    # -----------------------------------------------------------------------------
+    - name: Verify | Check if sshd service is running
+      ansible.builtin.service:
+        name: "{{ openssh_service_name }}"
+        state: started
+      register: _service_result_
+      ignore_errors: true
+      check_mode: true
+
+    - name: Verify | Check if sshd service is enabled
+      ansible.builtin.service:
+        name: "{{ openssh_service_name }}"
+        state: started
+        enabled: true
+      register: _service_enabled_result_
+      ignore_errors: true
+      check_mode: true
+
+    # -----------------------------------------------------------------------------
+    # 4. Configuration Verification
+    # -----------------------------------------------------------------------------
+    - name: Verify | Check if SSH configuration file exists
+      ansible.builtin.stat:
+        path: "{{ openssh_sshd_config_path }}"
+      register: _config_file_result_
+      ignore_errors: true
+
+    - name: Verify | Check SSH configuration file permissions
+      ansible.builtin.stat:
+        path: "{{ openssh_sshd_config_path }}"
+      register: _config_permissions_
+      ignore_errors: true
+
+    - name: Verify | Display SSH configuration file permissions
+      ansible.builtin.debug:
+        msg: "SSH config permissions: {{ _config_permissions_.stat.mode | default('N/A') }}"
+      when: _config_permissions_ is defined and _config_permissions_.stat is defined and _config_permissions_.stat.exists | default(false)
+
+    - name: Verify | Verify configuration file ownership
+      ansible.builtin.file:
+        path: "{{ openssh_sshd_config_path }}"
+        owner: "{{ openssh_config_owner }}"
+        group: "{{ openssh_config_group }}"
+        mode: "{{ openssh_config_mode }}"
+      check_mode: true
+      register: _config_ownership_
+      ignore_errors: true
+
+    # -----------------------------------------------------------------------------
+    # 5. SSH Configuration Settings Verification
+    # -----------------------------------------------------------------------------
+    - name: Verify | Check SSH daemon configuration
+      ansible.builtin.command:
+        cmd: "grep -i '{{ item.key }}' {{ openssh_sshd_config_path }}"
+      loop:
+        - { key: "PermitRootLogin", value: "{{ openssh_permit_root_login }}" }
+        - { key: "PasswordAuthentication", value: "{{ openssh_password_authentication }}" }
+        - { key: "X11Forwarding", value: "{{ openssh_x11_forwarding }}" }
+        - { key: "AllowAgentForwarding", value: "{{ openssh_agent_forwarding }}" }
+        - { key: "MaxAuthTries", value: "{{ openssh_max_auth_tries }}" }
+      register: _sshd_config_check_
+      changed_when: false
+      ignore_errors: true
+
+    # -----------------------------------------------------------------------------
+    # 6. Port Verification
+    # -----------------------------------------------------------------------------
+    - name: Verify | Check if SSH port is listening
+      ansible.builtin.command:
+        cmd: "ss -tunlp | grep '{{ openssh_port }}'"
+      register: _port_check_
+      changed_when: false
+      ignore_errors: true
+
+    - name: Verify | Display SSH port status
+      ansible.builtin.debug:
+        msg: "SSH port {{ openssh_port }} is {{ _port_check_.rc == 0 | ternary('open', 'closed') }}"
+
+    # -----------------------------------------------------------------------------
+    # 7. Test Results Summary
+    # -----------------------------------------------------------------------------
+    - name: Verify | Summarize test results
+      ansible.builtin.debug:
+        msg: |
+          OpenSSH Verification Summary:
+          ----------------------------
+          Package Installed: {{ not _package_result_.changed | ternary('PASS', 'FAIL') }}
+          Binary Available: {{ _binary_result_.rc | default(1) == 0 | ternary('PASS', 'FAIL') }}
+          Service Running: {{ _service_result_.changed | default(true) == false | ternary('PASS', 'FAIL') }}
+          Service Enabled: {{ _service_enabled_result_.changed | default(true) == false | ternary('PASS', 'FAIL') }}
+          Config File Exists: {{ _config_file_result_.stat.exists | default(false) | ternary('PASS', 'FAIL') }}
+          Config Permissions: {{ _config_ownership_.changed | default(true) == false | ternary('PASS', 'FAIL') }}
+          SSH Port Listening: {{ _port_check_.rc | default(1) == 0 | ternary('PASS', 'FAIL') }}

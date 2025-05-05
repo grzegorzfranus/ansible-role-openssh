@@ -1,0 +1,246 @@
+# =============================================================================
+# Ansible Role: OpenSSH - Molecule Preparation Playbook
+# =============================================================================
+# This playbook prepares the test environment for Molecule testing.
+# It performs necessary system preparations before role execution:
+# - Fixes file permissions
+# - Validates system requirements
+# - Sets up required dependencies for SSH testing
+#
+# Flow:
+# 1. Fix system file permissions
+# 2. Validate system state
+# =============================================================================
+
+---
+# -----------------------------------------------------------------------------
+# 1. System File Permissions
+# -----------------------------------------------------------------------------
+- name: molecule | Prepare
+  hosts: all
+  gather_facts: true
+
+  tasks:
+    - name: Prepare | Fix /etc/shadow permissions
+      register: etc_shadow
+      ansible.builtin.shell:
+        cmd: |
+          echo ""
+          ls -l /etc/shadow
+          chmod 0400 /etc/shadow
+          ls -l /etc/shadow
+          echo ""
+
+    - name: Prepare | Verify shadow file permissions
+      ansible.builtin.debug:
+        var: etc_shadow.stdout
+
+    - name: Prepare | Update package cache (Debian)
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_os_family is defined and ansible_os_family == "Debian"
+      ignore_errors: true
+      changed_when: false
+
+    - name: Prepare | Update package cache (RedHat)
+      ansible.builtin.dnf:
+        update_cache: true
+      when: ansible_os_family is defined and ansible_os_family == "RedHat"
+      ignore_errors: true
+      changed_when: false
+
+    # Install OpenSSH packages first to make ssh-keygen available
+    - name: Prepare | Install OpenSSH packages (Debian)
+      ansible.builtin.apt:
+        name:
+          - openssh-server
+          - openssh-client
+        state: present
+      when: ansible_os_family is defined and ansible_os_family == "Debian"
+      ignore_errors: true
+
+    - name: Prepare | Install OpenSSH packages (RedHat)
+      ansible.builtin.dnf:
+        name:
+          - openssh-server
+          - openssh-clients
+        state: present
+      when: ansible_os_family is defined and ansible_os_family == "RedHat"
+      ignore_errors: true
+
+    # Generate SSH host keys to avoid "no hostkeys available" error during testing
+    - name: Prepare | Ensure SSH directories exist
+      ansible.builtin.file:
+        path: /etc/ssh
+        state: directory
+        mode: '0755'
+      ignore_errors: true
+
+    - name: Prepare | Check if RSA key exists
+      ansible.builtin.stat:
+        path: /etc/ssh/ssh_host_rsa_key
+      register: rsa_key_file
+      ignore_errors: true
+
+    - name: Prepare | Check if ED25519 key exists
+      ansible.builtin.stat:
+        path: /etc/ssh/ssh_host_ed25519_key
+      register: ed25519_key_file
+      ignore_errors: true
+
+    - name: Prepare | Generate RSA host key if it doesn't exist
+      ansible.builtin.command:
+        cmd: ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
+      when: not rsa_key_file.stat.exists | default(false)
+      ignore_errors: true
+
+    - name: Prepare | Generate ED25519 host key if it doesn't exist
+      ansible.builtin.command:
+        cmd: ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N ''
+      when: not ed25519_key_file.stat.exists | default(false)
+      ignore_errors: true
+
+    # Fallback for key creation if ssh-keygen fails
+    - name: Prepare | Check again if RSA key exists
+      ansible.builtin.stat:
+        path: /etc/ssh/ssh_host_rsa_key
+      register: rsa_key_check
+      ignore_errors: true
+
+    - name: Prepare | Check again if ED25519 key exists
+      ansible.builtin.stat:
+        path: /etc/ssh/ssh_host_ed25519_key
+      register: ed25519_key_check
+      ignore_errors: true
+
+    # Create placeholder keys as a last resort
+    - name: Prepare | Create placeholder RSA key file if still missing
+      ansible.builtin.copy:
+        content: |
+          -----BEGIN OPENSSH PRIVATE KEY-----
+          b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABFwAAAAdzc2gtcn
+          NhAAAAAwEAAQAAAQEAvHAz+8NoOJCrQXwwlL9Au1JNZHPCkfO8QQvj7skl4J3PAyiIVzJT
+          kYKrPGCJ1gwO8rCIW5uRq5oLwvHC3iY29v/p8U6qw1SV9dZbgxQz9jxUZnJZF9vP5CbzYx
+          FOAh94XJZH7BAsSCM3aGWyQV2k+XkxQTL7YkAZOSpQVmOGLfvZ8YnlnzPODFPWPCj+q8I5
+          CAvQS6jPNAAcT1xG1fCQjSzAYtZq9WzAXRThEUmOHQjbLLkZnH+MdvK1tkgGeTRZQfMWHq
+          9gJJUjzl29rUYw0vwynG4Vb2wlLVoTDyOGJ5l3QXVuTzLgUiEH9JCztaYPKKMYCHkBKq/b
+          WHPUi0IUQAAAMgMK/NcDCvzXAAAAAdzc2gtcnNhAAABAQC8cDP7w2g4kKtBfDCUv0C7Uk
+          1kc8KR87xBC+PuySXgnc8DKIhXMlORgqs8YInWDA7ysIhbm5Grmgv7w2+Jjb2/+nxTqrDV
+          JX11luDFDP2PFRmclkX28/kJvNjEU4CH3hclkfsECxIIzdoZbJBXaT5eTFBMvtiQBk5KlB
+          WY4Yt+9nxieWfM84MU9Y8KP6rwjkIC9BLqM80ABxPXEbV8JCNLMBi1mr1bMBdFOERSY4dC
+          NssuRmcf4x28rW2SAZ5NFlB8xYer2AklSPOXb2tRjDS/DKcbhVvbCUtWhMPI4YnmXdBdW5
+          PMuBSIQf0kLO1pg8ooxgIeQEqr9tYc9TqLQhRBAAAAAwEAAQAAAQEAm9VGBD3EAD1dBvpj
+          XmgLKhJ5v67BnJFW1LHurZSHUzuwgd0KjurF9I057nDa+yG6GIwMVDvST+hyAPGWz4UKXW
+          8Yl/MiQAuL9QjPzFYdZU6xH3adYJ4Qb68TH7PnMfZSLYS9juLGTACJUeDlX7xcYPJdW05n
+          os/SsGKvNQRpAWc/CjxSeH0qJmGEHVSF/4QTpNSaaBG0DE0jU5a9xrAjnNrPqgx1HBErXK
+          yCdmLrbLmTkzCZSClkiMOGnjBwfSJnDO4TRDpTiM7QvEXgVUH7KS6YoLW2KdIbXBVkN6dj
+          N3rhjk+1SvF0pJKzQ4D5JQzLNOHA6I9AhsoCvpP8CQAAAIEA9KXuV7U3yIE1bYdIlCdS0O
+          MwFnFzuMCQ69MbmMqyADnJjJ+Qrs0xB6aPjJLPMxcxjZGZ/ES/74IXPZ6J11FzpOKJ6MSI
+          rJp6IB5t3ZEF5Znxj35vgOcBaLG3GFUk3vgZjJZyQDvEcvo2DzUNZRMRXbcGAKbXaQ7Kl2
+          OweYmMAAAAgQC+m96C3D6HfnBkP7ZvTZZJMqE+zdpIZuKZZlFXJB9udXmPxYKKCDkUZ
+          veSJkSEIZ3/hGwZxMCz7lrDk+y/wmBCMVmrJpC7TGIrZ5liFe9TbxkZk9kYXCJAhbqnzsk
+          hQKGHpHiuKh8HJhIKtfsvYQOKOvTEzLAqiDzwAAACAkJ9eXEw3/GgUCUCH3
+          dT2FinHbgOJx6gPF6/p+RAnJL3Y1mDtnHzTDrHDYRRi5VEbIhT6z1yVfXYHkpuXpKqVEY2
+          CmI6du7BQZWgHeh7YmFYJMvA+4sKT9A4H6PPJUjQHDw7QhvyJplqwfMCBCcb/pVxDbmkJB
+          rF9EITcZCI1iiPMAAAAAAQID
+          -----END OPENSSH PRIVATE KEY-----
+        dest: /etc/ssh/ssh_host_rsa_key
+        mode: '0600'
+        owner: root
+        group: root
+      when: not rsa_key_check.stat.exists | default(false)
+      ignore_errors: true
+
+    - name: Prepare | Create placeholder RSA key public file if still missing
+      ansible.builtin.copy:
+        content: |
+          ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8cDP7w2g4kKtBfDCUv0C7Uk1kc8KR87xBC+PuySXgnc8D
+          KIhXMlORgqs8YInWDA7ysIhbm5Grmgv7w2+Jjb2/+nxTqrDVJX11luDFDP2PFRmclkX28/kJvNjEU4CH3hcl
+          kfsECxIIzdoZbJBXaT5eTFBMvtiQBk5KlBWY4Yt+9nxieWfM84MU9Y8KP6rwjkIC9BLqM80ABxPXEbV8JCNLMBi1
+          mr1bMBdFOERSY4dCNssuRmcf4x28rW2SAZ5NFlB8xYer2AklSPOXb2tRjDS/DKcbhVvbCUtWhMPI4YnmXdBdW5PM
+          uBSIQf0kLO1pg8ooxgIeQEqr9tYc9TqLQhRB root@molecule-test
+        dest: /etc/ssh/ssh_host_rsa_key.pub
+        mode: '0644'
+        owner: root
+        group: root
+      when: not rsa_key_check.stat.exists | default(false)
+      ignore_errors: true
+
+    - name: Prepare | Create placeholder ED25519 key file if still missing
+      ansible.builtin.copy:
+        content: |
+          -----BEGIN OPENSSH PRIVATE KEY-----
+          b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+          QyNTUxOQAAACCcySZGIo+y2FYx0VGWTIpbxQPgmKF8otCIEYf/IiYXzgAAAJgcDkccHA5H
+          HAAAAAtzc2gtZWQyNTUxOQAAACCcySZGIo+y2FYx0VGWTIpbxQPgmKF8otCIEYf/IiYXzg
+          AAAEDu4/P7DH2DoYNiE2/9lfgCICY4qUzMEiLjtIfgXbDR85zJJkYij7LYVjHRUZZMilvF
+          A+CYoXyi0IgRh/8iJhfOAAAAEHJvb3RAbW9sZWN1bGUtY2kBAgMEBQ==
+          -----END OPENSSH PRIVATE KEY-----
+        dest: /etc/ssh/ssh_host_ed25519_key
+        mode: '0600'
+        owner: root
+        group: root
+      when: not ed25519_key_check.stat.exists | default(false)
+      ignore_errors: true
+
+    - name: Prepare | Create placeholder ED25519 key public file if still missing
+      ansible.builtin.copy:
+        content: |
+          ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJzJJkYij7LYVjHRUZZMilvFA+CYoXyi0IgRh/8iJhfO
+          root@molecule-test
+        dest: /etc/ssh/ssh_host_ed25519_key.pub
+        mode: '0644'
+        owner: root
+        group: root
+      when: not ed25519_key_check.stat.exists | default(false)
+      ignore_errors: true
+
+    - name: Prepare | Set correct permissions on host keys
+      ansible.builtin.file:
+        path: "{{ item }}"
+        mode: '0600'
+        owner: root
+        group: root
+      with_items:
+        - /etc/ssh/ssh_host_rsa_key
+        - /etc/ssh/ssh_host_ed25519_key
+      when: item is file
+      ignore_errors: true
+
+    # Create SSH privilege separation directory
+    - name: Prepare | Create SSH privilege separation directory
+      ansible.builtin.file:
+        path: /run/sshd
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      ignore_errors: true
+
+    # Create SSH run directories
+    - name: Prepare | Create SSH runtime directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      with_items:
+        - /var/run/sshd
+        - /var/empty/sshd
+      ignore_errors: true
+
+    # Ensure systemd directories exist
+    - name: Prepare | Create systemd service directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+      with_items:
+        - /etc/systemd/system
+        - /lib/systemd/system
+      when: ansible_service_mgr is defined and ansible_service_mgr == 'systemd'
+      ignore_errors: true

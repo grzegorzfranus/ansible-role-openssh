@@ -1,0 +1,416 @@
+---
+# =============================================================================
+# Ansible Role: OpenSSH - Assertions
+# =============================================================================
+# This file contains assertions to validate all role variables before execution.
+# These checks ensure that the provided variable values are of the correct type
+# and within valid ranges/options, preventing runtime errors.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. General Settings
+# -----------------------------------------------------------------------------
+- name: OpenSSH | assert | Test if openssh_role_action is valid
+  assert:
+    that:
+      - openssh_role_action is defined
+      - openssh_role_action is string
+      - openssh_role_action in [ "all", "install", "config" ]
+    quiet: true
+    fail_msg: "openssh_role_action must be one of: all, install, config"
+
+- name: OpenSSH | assert | Test if openssh_service_enabled is valid
+  assert:
+    that:
+      - openssh_service_enabled is defined
+      - openssh_service_enabled is boolean
+    quiet: true
+    fail_msg: "openssh_service_enabled must be a boolean (true/false)"
+
+# -----------------------------------------------------------------------------
+# 2. SSH Server Settings
+# -----------------------------------------------------------------------------
+- name: OpenSSH | assert | Test if openssh_sshd_config_path is valid
+  assert:
+    that:
+      - openssh_sshd_config_path is defined
+      - openssh_sshd_config_path is string
+    quiet: true
+    fail_msg: "openssh_sshd_config_path must be a valid file path string"
+
+- name: OpenSSH | assert | Test if openssh_sshd_config_dir is valid
+  assert:
+    that:
+      - openssh_sshd_config_dir is defined
+      - openssh_sshd_config_dir is string
+    quiet: true
+    fail_msg: "openssh_sshd_config_dir must be a valid directory path string"
+
+- name: OpenSSH | assert | Test if openssh_port is valid
+  assert:
+    that:
+      - openssh_port is defined
+      - openssh_port is number
+      - openssh_port > 0
+      - openssh_port <= 65535
+    quiet: true
+    fail_msg: "openssh_port must be a number between 1 and 65535"
+
+- name: OpenSSH | assert | Test if openssh_protocol is valid
+  assert:
+    that:
+      - openssh_protocol is defined
+      - openssh_protocol is number
+      - openssh_protocol == 2
+    quiet: true
+    fail_msg: "openssh_protocol must be set to 2 (SSH protocol 1 is insecure and obsolete)"
+
+- name: OpenSSH | assert | Test if openssh_listen_addresses is valid
+  assert:
+    that:
+      - openssh_listen_addresses is defined
+      - openssh_listen_addresses is sequence
+    quiet: true
+    fail_msg: "openssh_listen_addresses must be a list of IP addresses"
+
+- name: OpenSSH | assert | Test if tcp/agent/x11 forwarding settings are valid
+  assert:
+    that:
+      - openssh_tcp_forwarding is defined
+      - openssh_tcp_forwarding is boolean
+      - openssh_agent_forwarding is defined
+      - openssh_agent_forwarding is boolean
+      - openssh_x11_forwarding is defined
+      - openssh_x11_forwarding is boolean
+    quiet: true
+    fail_msg: "openssh forwarding settings must be boolean values"
+
+- name: OpenSSH | assert | Test if openssh_permit_tunnel is valid
+  assert:
+    that:
+      - openssh_permit_tunnel is defined
+      - openssh_permit_tunnel is boolean
+    quiet: true
+    fail_msg: "openssh_permit_tunnel must be a boolean value"
+
+- name: OpenSSH | assert | Test if openssh_gateway_ports is valid
+  assert:
+    that:
+      - openssh_gateway_ports is defined
+      - openssh_gateway_ports is boolean
+    quiet: true
+    fail_msg: "openssh_gateway_ports must be a boolean value"
+
+- name: OpenSSH | assert | Test if openssh_disable_forwarding is valid
+  assert:
+    that:
+      - openssh_disable_forwarding is defined
+      - openssh_disable_forwarding is boolean
+    quiet: true
+    fail_msg: "openssh_disable_forwarding must be a boolean value"
+
+- name: OpenSSH | assert | Test if banner/motd settings are valid
+  assert:
+    that:
+      - openssh_print_motd is defined
+      - openssh_print_motd is boolean
+      - openssh_print_last_log is defined
+      - openssh_print_last_log is boolean
+      - openssh_banner_path is defined
+      - openssh_banner_path is string
+    quiet: true
+    fail_msg: "banner/motd settings contain invalid values"
+
+- name: OpenSSH | assert | Test if session timeout settings are valid
+  assert:
+    that:
+      - openssh_client_alive_interval is defined
+      - openssh_client_alive_interval is number
+      - openssh_client_alive_interval >= 0
+      - openssh_client_alive_count_max is defined
+      - openssh_client_alive_count_max is number
+      - openssh_client_alive_count_max >= 0
+    quiet: true
+    fail_msg: "session timeout settings must be non-negative numbers"
+
+- name: OpenSSH | assert | Test if max session settings are valid
+  assert:
+    that:
+      - openssh_max_sessions is defined
+      - openssh_max_sessions is number
+      - openssh_max_sessions > 0
+      - openssh_max_startups is defined
+      - openssh_max_startups is string
+    quiet: true
+    fail_msg: "max session settings contain invalid values"
+
+# -----------------------------------------------------------------------------
+# 3. Authentication Settings
+# -----------------------------------------------------------------------------
+- name: OpenSSH | assert | Test if openssh_permit_root_login is valid
+  assert:
+    that:
+      - openssh_permit_root_login is defined
+      - openssh_permit_root_login is string
+      - openssh_permit_root_login in ["yes", "no", "without-password", "prohibit-password"]
+    quiet: true
+    fail_msg: "openssh_permit_root_login must be one of: yes, no, without-password, prohibit-password"
+
+- name: OpenSSH | assert | Test if password settings are valid
+  assert:
+    that:
+      - openssh_permit_empty_passwords is defined
+      - openssh_permit_empty_passwords is boolean
+      - openssh_password_authentication is defined
+      - openssh_password_authentication is boolean
+      - openssh_pubkey_authentication is defined
+      - openssh_pubkey_authentication is boolean
+    quiet: true
+    fail_msg: "password and authentication settings must be boolean values"
+
+- name: OpenSSH | assert | Test if host-based auth settings are valid
+  assert:
+    that:
+      - openssh_host_based_auth is defined
+      - openssh_host_based_auth is boolean
+      - openssh_challenge_response_auth is defined
+      - openssh_challenge_response_auth is boolean
+    quiet: true
+    fail_msg: "host-based authentication settings must be boolean values"
+
+- name: OpenSSH | assert | Test if openssh_ignore_rhosts is valid
+  assert:
+    that:
+      - openssh_ignore_rhosts is defined
+      - openssh_ignore_rhosts is boolean
+    quiet: true
+    fail_msg: "openssh_ignore_rhosts must be a boolean value"
+
+- name: OpenSSH | assert | Test if openssh_permit_user_environment is valid
+  assert:
+    that:
+      - openssh_permit_user_environment is defined
+      - openssh_permit_user_environment is boolean
+    quiet: true
+    fail_msg: "openssh_permit_user_environment must be a boolean value"
+
+- name: OpenSSH | assert | Test if Kerberos/GSSAPI settings are valid
+  assert:
+    that:
+      - openssh_kerberos_auth is defined
+      - openssh_kerberos_auth is boolean
+      - openssh_kerberos_ticket_cleanup is defined
+      - openssh_kerberos_ticket_cleanup is boolean
+      - openssh_gssapi_auth is defined
+      - openssh_gssapi_auth is boolean
+      - openssh_gssapi_cleanup_credentials is defined
+      - openssh_gssapi_cleanup_credentials is boolean
+    quiet: true
+    fail_msg: "Kerberos/GSSAPI settings must be boolean values"
+
+- name: OpenSSH | assert | Test if allow/deny lists are valid
+  assert:
+    that:
+      - openssh_allow_users is defined
+      - openssh_allow_users is sequence
+      - openssh_allow_groups is defined
+      - openssh_allow_groups is sequence
+      - openssh_deny_users is defined
+      - openssh_deny_users is sequence
+      - openssh_deny_groups is defined
+      - openssh_deny_groups is sequence
+    quiet: true
+    fail_msg: "allow/deny lists must be lists (empty lists are allowed)"
+
+- name: OpenSSH | assert | Test if openssh_authorized_keys_file is valid
+  assert:
+    that:
+      - openssh_authorized_keys_file is defined
+      - openssh_authorized_keys_file is string
+    quiet: true
+    fail_msg: "openssh_authorized_keys_file must be a valid file path string"
+
+- name: OpenSSH | assert | Test if openssh_max_auth_tries is valid
+  assert:
+    that:
+      - openssh_max_auth_tries is defined
+      - openssh_max_auth_tries is number
+      - openssh_max_auth_tries > 0
+    quiet: true
+    fail_msg: "openssh_max_auth_tries must be a positive number"
+
+# -----------------------------------------------------------------------------
+# 4. Network Settings
+# -----------------------------------------------------------------------------
+- name: OpenSSH | assert | Test if network settings are valid
+  assert:
+    that:
+      - openssh_use_dns is defined
+      - openssh_use_dns is boolean
+      - openssh_address_family is defined
+      - openssh_address_family is string
+      - openssh_address_family in ["inet", "inet6", "any"]
+      - openssh_gateway_ports is defined
+      - openssh_gateway_ports is boolean
+      - openssh_accept_env is defined
+      - openssh_accept_env is sequence
+    quiet: true
+    fail_msg: "network settings contain invalid values"
+
+# -----------------------------------------------------------------------------
+# 5. Security Settings
+# -----------------------------------------------------------------------------
+- name: OpenSSH | assert | Test if openssh_strict_modes is valid
+  assert:
+    that:
+      - openssh_strict_modes is defined
+      - openssh_strict_modes is boolean
+    quiet: true
+    fail_msg: "openssh_strict_modes must be a boolean value"
+
+- name: OpenSSH | assert | Test if cipher/algorithm lists are valid
+  assert:
+    that:
+      - openssh_ciphers is defined
+      - openssh_ciphers is sequence
+      - openssh_ciphers | length > 0
+      - openssh_macs is defined
+      - openssh_macs is sequence
+      - openssh_macs | length > 0
+      - openssh_kex_algorithms is defined
+      - openssh_kex_algorithms is sequence
+      - openssh_kex_algorithms | length > 0
+      - openssh_host_key_algorithms is defined
+      - openssh_host_key_algorithms is sequence
+      - openssh_host_key_algorithms | length > 0
+    quiet: true
+    fail_msg: "cipher and algorithm lists must be non-empty lists"
+
+- name: OpenSSH | assert | Test if openssh_host_keys is valid
+  assert:
+    that:
+      - openssh_host_keys is defined
+      - openssh_host_keys is sequence
+      - openssh_host_keys | length > 0
+    quiet: true
+    fail_msg: "openssh_host_keys must be a non-empty list of key file paths"
+
+- name: OpenSSH | assert | Test if openssh_compression is valid
+  assert:
+    that:
+      - openssh_compression is defined
+      - openssh_compression is string
+      - openssh_compression in ["yes", "no", "delayed"]
+    quiet: true
+    fail_msg: "openssh_compression must be one of: yes, no, delayed"
+
+- name: OpenSSH | assert | Test if openssh_login_grace_time is valid
+  assert:
+    that:
+      - openssh_login_grace_time is defined
+      - openssh_login_grace_time is number
+      - openssh_login_grace_time >= 0
+    quiet: true
+    fail_msg: "openssh_login_grace_time must be a non-negative number"
+
+- name: OpenSSH | assert | Test if openssh_use_pam is valid
+  assert:
+    that:
+      - openssh_use_pam is defined
+      - openssh_use_pam is boolean
+    quiet: true
+    fail_msg: "openssh_use_pam must be a boolean value"
+
+- name: OpenSSH | assert | Test if SELinux SSH settings are valid
+  assert:
+    that:
+      - openssh_selinux_chroot_rw_homedirs is defined
+      - openssh_selinux_chroot_rw_homedirs is boolean
+      - openssh_selinux_sysadm_login is defined
+      - openssh_selinux_sysadm_login is boolean
+    quiet: true
+    fail_msg: "SELinux settings for OpenSSH must be boolean values"
+
+# -----------------------------------------------------------------------------
+# 6. Logging Settings
+# -----------------------------------------------------------------------------
+- name: OpenSSH | assert | Test if logging settings are valid
+  assert:
+    that:
+      - openssh_log_level is defined
+      - openssh_log_level is string
+      - openssh_log_level in ["QUIET", "FATAL", "ERROR", "INFO", "VERBOSE", "DEBUG", "DEBUG1", "DEBUG2", "DEBUG3"]
+      - openssh_syslog_facility is defined
+      - openssh_syslog_facility is string
+    quiet: true
+    fail_msg: "logging settings contain invalid values"
+
+# -----------------------------------------------------------------------------
+# 7. SSH Client Settings
+# -----------------------------------------------------------------------------
+- name: OpenSSH | assert | Test if openssh_configure_client is valid
+  assert:
+    that:
+      - openssh_configure_client is defined
+      - openssh_configure_client is boolean
+    quiet: true
+    fail_msg: "openssh_configure_client must be a boolean value"
+
+- name: OpenSSH | assert | Test if openssh_ssh_config_path is valid
+  assert:
+    that:
+      - openssh_ssh_config_path is defined
+      - openssh_ssh_config_path is string
+    quiet: true
+    fail_msg: "openssh_ssh_config_path must be a valid file path string"
+
+- name: OpenSSH | assert | Test if openssh_client_settings is valid
+  assert:
+    that:
+      - openssh_client_settings is defined
+      - openssh_client_settings is mapping
+      - openssh_client_settings.connection_attempts is defined
+      - openssh_client_settings.connection_attempts is number
+      - openssh_client_settings.connection_attempts > 0
+      - openssh_client_settings.connect_timeout is defined
+      - openssh_client_settings.connect_timeout is number
+      - openssh_client_settings.connect_timeout > 0
+      - openssh_client_settings.server_alive_interval is defined
+      - openssh_client_settings.server_alive_interval is number
+      - openssh_client_settings.server_alive_interval >= 0
+      - openssh_client_settings.server_alive_count_max is defined
+      - openssh_client_settings.server_alive_count_max is number
+      - openssh_client_settings.server_alive_count_max >= 0
+      - openssh_client_settings.check_host_ip is defined
+      - openssh_client_settings.check_host_ip is boolean
+      - openssh_client_settings.strict_host_key_checking is defined
+      - openssh_client_settings.strict_host_key_checking is string
+      - openssh_client_settings.strict_host_key_checking in ["yes", "no", "ask"]
+      - openssh_client_settings.update_host_keys is defined
+      - openssh_client_settings.update_host_keys is string
+      - openssh_client_settings.update_host_keys in ["yes", "no", "ask"]
+      - openssh_client_settings.verify_host_key_dns is defined
+      - openssh_client_settings.verify_host_key_dns is string
+      - openssh_client_settings.verify_host_key_dns in ["yes", "no", "ask"]
+      - openssh_client_settings.forward_agent is defined
+      - openssh_client_settings.forward_agent is boolean
+      - openssh_client_settings.forward_x11 is defined
+      - openssh_client_settings.forward_x11 is boolean
+      - openssh_client_settings.global_known_hosts_file is defined
+      - openssh_client_settings.global_known_hosts_file is string
+      - openssh_client_settings.user_known_hosts_file is defined
+      - openssh_client_settings.user_known_hosts_file is string
+      - openssh_client_settings.send_env is defined
+      - openssh_client_settings.send_env is sequence
+    quiet: true
+    fail_msg: "openssh_client_settings is missing required fields or contains invalid values"
+
+# -----------------------------------------------------------------------------
+# 8. Custom Options Validation
+# -----------------------------------------------------------------------------
+- name: OpenSSH | assert | Test if openssh_custom_options is valid (if defined)
+  assert:
+    that:
+      - openssh_custom_options is undefined or (openssh_custom_options is defined and openssh_custom_options is sequence)
+    quiet: true
+    fail_msg: "openssh_custom_options, if defined, must be a list of strings"

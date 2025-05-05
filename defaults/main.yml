@@ -1,0 +1,261 @@
+---
+# =============================================================================
+# Ansible Role: OpenSSH - Default Variables
+# =============================================================================
+# This file defines default configuration values for the OpenSSH service.
+# These values can be overridden by setting them in your playbook or inventory.
+#
+# SECURITY PRIORITY: This configuration prioritizes high security over compatibility
+# and convenience. For production environments with sensitive data, these settings
+# represent current best practices in SSH hardening.
+#
+# Sections:
+#   1. General Settings
+#   2. SSH Server Settings
+#   3. Authentication Settings
+#   4. Network Settings
+#   5. Security Settings
+#   6. Logging Settings
+#   7. SSH Client Settings
+#   8. Custom Settings
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. General Settings
+# -----------------------------------------------------------------------------
+# Role execution control and basic service configuration
+
+# Define which parts of the role to execute (Options: 'all', 'install', 'config')
+openssh_role_action: "all"
+
+# Enable/disable SSH service on boot
+openssh_service_enabled: true
+
+# -----------------------------------------------------------------------------
+# 2. SSH Server Settings
+# -----------------------------------------------------------------------------
+# Core OpenSSH server configuration
+
+# SSH daemon configuration file path
+openssh_sshd_config_path: "/etc/ssh/sshd_config"
+
+# SSH daemon configuration directory for drop-in files
+openssh_sshd_config_dir: "/etc/ssh/sshd_config.d"
+
+# SSH daemon port - Using a non-standard port adds security by obscurity
+# However, 22 is kept as default for compatibility - consider changing in production
+openssh_port: 22
+
+# SSH protocol version (only protocol 2 is supported in modern OpenSSH)
+# Protocol 1 is insecure and obsolete
+openssh_protocol: 2
+
+# Listen addresses
+# Use empty list for all available addresses, or specify IPs
+# For higher security, specify only required interfaces instead of binding to all
+openssh_listen_addresses: []
+
+# Disable all forwarding features for increased security
+openssh_tcp_forwarding: false
+openssh_agent_forwarding: false
+openssh_x11_forwarding: false
+openssh_permit_tunnel: false
+openssh_gateway_ports: false
+
+# Additional forwarding control - disable all forwarding in one directive
+# This is more secure and supplements individual forwarding options above
+openssh_disable_forwarding: true
+
+# Print banner message before authentication
+openssh_print_motd: true
+openssh_print_last_log: true
+
+# Banner file path
+openssh_banner_path: "/etc/issue.net"
+
+# SSH session timeout settings (in seconds)
+# Reduced values for higher security - disconnects idle sessions faster
+openssh_client_alive_interval: 180
+openssh_client_alive_count_max: 2
+
+# Maximum SSH sessions - limited for security
+openssh_max_sessions: 5
+# Control simultaneous unauthenticated connections (start:rate:full)
+# Format: 10:30:100 = max 10 unauthenticated connections; 30% chance of drop after 10; full 100 connections
+openssh_max_startups: "5:50:10"
+
+# -----------------------------------------------------------------------------
+# 3. Authentication Settings
+# -----------------------------------------------------------------------------
+# Authentication methods and restrictions
+
+# Disable root login entirely for maximum security
+openssh_permit_root_login: "no"
+
+# Never allow empty passwords
+openssh_permit_empty_passwords: false
+
+# Disable password authentication for higher security (require key-based auth)
+openssh_password_authentication: false
+
+# Enable public key authentication (preferred method)
+openssh_pubkey_authentication: true
+
+# Disable host-based authentication (security risk)
+openssh_host_based_auth: false
+
+# Disable .rhosts files (security best practice)
+openssh_ignore_rhosts: true
+
+# Disable challenge-response authentication
+openssh_challenge_response_auth: false
+
+# Disable Kerberos authentication (unless specifically needed)
+openssh_kerberos_auth: false
+openssh_kerberos_ticket_cleanup: true
+
+# Disable GSSAPI authentication (unless specifically needed)
+openssh_gssapi_auth: false
+openssh_gssapi_cleanup_credentials: true
+
+# Disable user environment file processing for security
+openssh_permit_user_environment: false
+
+# Only allow users/groups in these lists to log in
+# For maximum security, explicitly specify allowed users
+openssh_allow_users: []
+openssh_allow_groups: []
+openssh_deny_users: []
+openssh_deny_groups: []
+
+# AuthorizedKeysFile location
+openssh_authorized_keys_file: ".ssh/authorized_keys"
+
+# Reduce maximum authentication tries to prevent brute force
+openssh_max_auth_tries: 3
+
+# -----------------------------------------------------------------------------
+# 4. Network Settings
+# -----------------------------------------------------------------------------
+# Network-related OpenSSH settings
+
+# Disable DNS lookups to avoid DNS issues and privacy concerns
+openssh_use_dns: false
+
+# Address family to use (options: 'inet' for IPv4 only, 'inet6' for IPv6 only, 'any' for both)
+openssh_address_family: "any"
+
+# Gateway ports setting is already defined in the SSH Server Settings section
+# Setting: openssh_gateway_ports
+
+# Limit accepted environment variables to minimum needed
+openssh_accept_env: ["LANG", "LC_*"]
+
+# -----------------------------------------------------------------------------
+# 5. Security Settings
+# -----------------------------------------------------------------------------
+# Security specific configurations
+
+# Enable strict mode (essential for checking permissions)
+openssh_strict_modes: true
+
+# Ciphers to allow - only the most secure modern ciphers
+# Removes older, less secure options
+openssh_ciphers:
+  - "chacha20-poly1305@openssh.com"
+  - "aes256-gcm@openssh.com"
+  - "aes128-gcm@openssh.com"
+
+# MAC algorithms to allow - only modern, secure ETM (encrypt-then-MAC) variants
+# ETM variants are more secure and prevent specific attacks
+openssh_macs:
+  - "hmac-sha2-512-etm@openssh.com"
+  - "hmac-sha2-256-etm@openssh.com"
+
+# Key exchange algorithms - only modern, secure options
+# Removed potentially less secure options
+openssh_kex_algorithms:
+  - "curve25519-sha256@libssh.org"
+  - "curve25519-sha256"
+  - "diffie-hellman-group16-sha512"
+  - "diffie-hellman-group18-sha512"
+
+# Host key algorithms to allow - prioritize ED25519 and strong RSA
+openssh_host_key_algorithms:
+  - "ssh-ed25519"
+  - "rsa-sha2-512"
+  - "rsa-sha2-256"
+
+# Paths to host keys
+openssh_host_keys:
+  - "/etc/ssh/ssh_host_rsa_key"
+  - "/etc/ssh/ssh_host_ed25519_key"
+
+# Disable compression (helps prevent compression-related attacks)
+openssh_compression: "no"
+
+# Reduce login grace time for security (less time window for attacks)
+openssh_login_grace_time: 60
+
+# Use PAM for authentication
+openssh_use_pam: true
+
+# SELinux configuration for OpenSSH
+# These settings control SELinux booleans related to SSH security
+openssh_selinux_chroot_rw_homedirs: false  # Restrict SSH to home directories
+openssh_selinux_sysadm_login: false        # Prevent SSH from logging in as sysadm
+
+# -----------------------------------------------------------------------------
+# 6. Logging Settings
+# -----------------------------------------------------------------------------
+# Logging and audit settings
+
+# Increase log level for better security monitoring
+openssh_log_level: "VERBOSE"
+
+# Syslog facility to use
+openssh_syslog_facility: "AUTH"
+
+# -----------------------------------------------------------------------------
+# 7. SSH Client Settings
+# -----------------------------------------------------------------------------
+# Global SSH client settings (in /etc/ssh/ssh_config)
+
+# Enable/disable SSH client configuration
+openssh_configure_client: true
+
+# SSH client configuration file path
+openssh_ssh_config_path: "/etc/ssh/ssh_config"
+
+# Global client settings
+openssh_client_settings:
+  # Connection settings
+  connection_attempts: 2
+  connect_timeout: 10
+  server_alive_interval: 180
+  server_alive_count_max: 2
+
+  # Security settings - set to more secure defaults
+  check_host_ip: true
+  strict_host_key_checking: "yes"
+  update_host_keys: "yes"
+  verify_host_key_dns: "yes"
+
+  # Forwarding settings - disabled for security
+  forward_agent: false
+  forward_x11: false
+
+  # Global host settings
+  global_known_hosts_file: "/etc/ssh/ssh_known_hosts"
+  user_known_hosts_file: "~/.ssh/known_hosts"
+
+  # Misc settings
+  send_env: ["LANG", "LC_*"]
+
+# -----------------------------------------------------------------------------
+# 8. Custom Settings
+# -----------------------------------------------------------------------------
+# Custom sshd_config options not covered by the variables above
+# These will be added to the end of the sshd_config file
+# Each entry should be a complete configuration line
+openssh_custom_options: []

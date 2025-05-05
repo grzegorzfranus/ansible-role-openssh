@@ -1,0 +1,101 @@
+---
+# =============================================================================
+# Ansible Role: OpenSSH - Main Tasks
+# =============================================================================
+# This is the main task file for the OpenSSH role. It orchestrates the execution
+# of all role components in the correct order. Each task is tagged appropriately
+# to allow for selective execution.
+#
+# Flow:
+# 1. Operating system validation
+# 2. Load OS-specific variables
+# 3. Validate role variables
+# 4. Check system prerequisites
+# 5. Install OpenSSH packages
+# 6. Configure SELinux (if applicable)
+# 7. Configure OpenSSH server and client
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. Operating System Validation
+# -----------------------------------------------------------------------------
+- name: OpenSSH | main | Check supported operating system
+  become: true
+  ansible.builtin.fail:
+    msg: "Unsupported OS family: {{ ansible_os_family }}. This role supports Debian and RedHat OS families only."
+  when: ansible_os_family not in ["Debian", "RedHat"]
+  tags:
+    - always
+
+# -----------------------------------------------------------------------------
+# 2. OS-Specific Variables
+# -----------------------------------------------------------------------------
+- name: OpenSSH | main | Load OS-specific variables
+  ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_facts['distribution'] | lower }}_{{ ansible_facts['distribution_version'] | lower }}.yml"
+        - "{{ ansible_facts['distribution'] | lower }}_{{ ansible_facts['distribution_major_version'] | lower }}.yml"
+        - "{{ ansible_facts['distribution'] | lower }}.yml"
+        - "{{ ansible_facts['os_family'] | lower }}_{{ ansible_facts['distribution_version'] | lower }}.yml"
+        - "{{ ansible_facts['os_family'] | lower }}_{{ ansible_facts['distribution_major_version'].split('.')[0] }}.yml"
+        - "{{ ansible_facts['os_family'] | lower }}.yml"
+        - "main.yml"
+      paths:
+        - "{{ role_path }}/vars"
+  tags:
+    - always
+
+# -----------------------------------------------------------------------------
+# 3. Variable Validation
+# -----------------------------------------------------------------------------
+- name: OpenSSH | main | Validate role variables
+  ansible.builtin.include_tasks: assert.yml
+  tags:
+    - always
+    - validate
+
+# -----------------------------------------------------------------------------
+# 4. System Prerequisites
+# -----------------------------------------------------------------------------
+- name: OpenSSH | main | Verify system prerequisites
+  ansible.builtin.include_tasks: prerequisites.yml
+  when: >
+    openssh_role_action in ['all', 'install']
+  tags:
+    - setup
+    - prerequisites
+
+# -----------------------------------------------------------------------------
+# 5. Package Installation
+# -----------------------------------------------------------------------------
+- name: OpenSSH | main | Install OpenSSH packages
+  ansible.builtin.include_tasks: install.yml
+  when: >
+    openssh_role_action in ['all', 'install']
+  tags:
+    - setup
+    - install
+
+# -----------------------------------------------------------------------------
+# 6. SELinux Configuration (if applicable)
+# -----------------------------------------------------------------------------
+- name: OpenSSH | main | Configure SELinux for OpenSSH
+  ansible.builtin.include_tasks: selinux.yml
+  when: >
+    openssh_role_action in ['all', 'install', 'config']
+  tags:
+    - setup
+    - selinux
+    - security
+
+# -----------------------------------------------------------------------------
+# 7. Service Configuration
+# -----------------------------------------------------------------------------
+- name: OpenSSH | main | Configure OpenSSH service
+  ansible.builtin.include_tasks: configure.yml
+  when: >
+    openssh_role_action in ['all', 'config']
+  tags:
+    - configure

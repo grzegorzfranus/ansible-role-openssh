@@ -1,0 +1,35 @@
+---
+galaxy_info:
+  role_name: openssh
+  author: Grzegorz Franus
+  namespace: grzegorzfranus
+  description: >
+    Ansible role to install and configure OpenSSH server with security hardening.
+  license: Apache-2.0
+  company: EWARE
+  min_ansible_version: "2.15"
+
+  platforms:
+    - name: Debian
+      versions:
+        - "bookworm"
+        - "bullseye"
+    - name: Ubuntu
+      versions:
+        - "noble"
+        - "jammy"
+    - name: EL
+      versions:
+        - "9"
+
+  galaxy_tags:
+    - openssh
+    - ssh
+    - sshd
+    - security
+    - hardening
+    - authentication
+    - communication
+    - networking
+
+dependencies: []

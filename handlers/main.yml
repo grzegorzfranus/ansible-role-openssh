@@ -1,0 +1,20 @@
+---
+# =============================================================================
+# Ansible Role: OpenSSH - Handlers
+# =============================================================================
+# Handlers are tasks that only run when notified by other tasks. They are
+# typically used for operations that need to happen once, after multiple
+# configuration changes, such as restarting services.
+#
+# Available Handlers:
+# 1. Restart OpenSSH service - Restarts the SSH daemon after configuration changes
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. OpenSSH Service Restart
+# -----------------------------------------------------------------------------
+- name: OpenSSH | handlers | Restart service
+  become: true
+  ansible.builtin.service:
+    name: "{{ openssh_service_name }}"
+    state: restarted

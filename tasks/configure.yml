@@ -1,0 +1,63 @@
+---
+# =============================================================================
+# Ansible Role: OpenSSH - Configuration Tasks
+# =============================================================================
+# This file contains tasks to configure OpenSSH server and client. It performs
+# the following actions:
+#
+# 1. Deploy server configuration
+# 2. Deploy client configuration (optional)
+# 3. Set up login banner
+# 4. Configure service status
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. Server Configuration
+# -----------------------------------------------------------------------------
+- name: OpenSSH | configure | Deploy SSH server configuration
+  become: true
+  ansible.builtin.template:
+    src: "ssh/sshd_config.j2"
+    dest: "{{ openssh_sshd_config_path }}"
+    owner: root
+    group: root
+    mode: '0600'
+    backup: true
+    validate: "{{ openssh_sshd_validate_command | default('/usr/sbin/sshd -t -f %s') }}"
+  notify: OpenSSH | handlers | Restart service
+
+# -----------------------------------------------------------------------------
+# 2. Client Configuration
+# -----------------------------------------------------------------------------
+- name: OpenSSH | configure | Deploy SSH client configuration
+  become: true
+  ansible.builtin.template:
+    src: "ssh/ssh_config.j2"
+    dest: "{{ openssh_ssh_config_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  when: openssh_configure_client | bool
+
+# -----------------------------------------------------------------------------
+# 3. Banner Setup
+# -----------------------------------------------------------------------------
+- name: OpenSSH | configure | Create banner file
+  become: true
+  ansible.builtin.template:
+    src: "ssh/banner.j2"
+    dest: "{{ openssh_banner_path }}"
+    owner: root
+    group: root
+    mode: '0644'
+
+# -----------------------------------------------------------------------------
+# 4. Service Status Management
+# -----------------------------------------------------------------------------
+- name: OpenSSH | configure | Ensure SSH service is enabled
+  become: true
+  ansible.builtin.service:
+    name: "{{ openssh_service_name }}"
+    enabled: "{{ openssh_service_enabled }}"
+    state: started

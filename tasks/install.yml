@@ -1,0 +1,22 @@
+---
+# =============================================================================
+# Ansible Role: OpenSSH - Installation Tasks
+# =============================================================================
+# This file handles the installation of the OpenSSH packages on the target system.
+# It ensures that the proper version of the software is installed according to
+# the distribution-specific package names defined in variables.
+#
+# The role uses the generic package module to be compatible with various
+# package managers across different Linux distributions.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Package Installation
+# -----------------------------------------------------------------------------
+- name: OpenSSH | install | Install OpenSSH packages
+  become: true
+  ansible.builtin.package:
+    name: "{{ openssh_packages }}"
+    state: present
+  when: not openssh_server_installed
+  notify: OpenSSH | handlers | Restart service

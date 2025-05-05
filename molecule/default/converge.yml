@@ -1,0 +1,64 @@
+# =============================================================================
+# Ansible Role: OpenSSH - Molecule Convergence Playbook
+# =============================================================================
+# This playbook executes the main role functionality in the test environment.
+# It performs the following steps:
+# - Updates package repositories
+# - Ensures system readiness
+# - Executes the OpenSSH role with test configuration
+#
+# Flow:
+# 1. Update package cache
+# 2. Wait for system initialization
+# 3. Apply OpenSSH role with test variables
+# =============================================================================
+
+---
+# -----------------------------------------------------------------------------
+# 1. Pre-Tasks Setup
+# -----------------------------------------------------------------------------
+- name: molecule | Converge
+  hosts: all
+
+  pre_tasks:
+    # System Initialization
+    - name: Converge | Wait for systemd to complete initialization
+      command: systemctl is-system-running
+      register: systemctl_status
+      until: >
+        'running' in systemctl_status.stdout or
+        'degraded' in systemctl_status.stdout
+      retries: 30
+      delay: 5
+      when: >
+        ansible_service_mgr is defined and
+        ansible_service_mgr == 'systemd'
+      changed_when: false
+      failed_when: systemctl_status.rc > 1
+
+# -----------------------------------------------------------------------------
+# 2. Role Execution with Test Variables
+# -----------------------------------------------------------------------------
+  vars:
+    # Test configuration for OpenSSH role
+    openssh_service_enabled: true
+    openssh_permit_root_login: "no"
+    openssh_password_authentication: true
+    openssh_x11_forwarding: false
+    openssh_agent_forwarding: true
+    openssh_tcp_forwarding: true
+    openssh_max_auth_tries: 4
+    openssh_allow_users:
+      - testuser
+      - ansible
+    openssh_custom_options:
+      - "ClientAliveInterval 300"
+      - "ClientAliveCountMax 2"
+      - "MaxStartups 10:30:100"
+    # Configuration file ownership settings
+    openssh_config_owner: root
+    openssh_config_group: root
+    openssh_config_mode: '0600'
+
+  roles:
+    - role: grzegorzfranus.openssh
