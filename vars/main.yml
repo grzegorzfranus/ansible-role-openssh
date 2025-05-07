@@ -2,8 +2,15 @@
 # =============================================================================
 # Ansible Role: OpenSSH - Common Variables
 # =============================================================================
-# This file contains variables that are common across all OS families.
+# This file defines common variables shared across all distributions.
+# These values are distribution-agnostic and apply to all supported systems.
+#
+# Sections:
+#   1. Configuration Validation
 # =============================================================================
 
+# -----------------------------------------------------------------------------
+# 1. Configuration Validation
+# -----------------------------------------------------------------------------
 # SSH daemon validation command
 openssh_sshd_validate_command: '/usr/sbin/sshd -t -f %s'

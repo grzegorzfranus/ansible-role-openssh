@@ -6,6 +6,9 @@
 # It ensures that the proper version of the software is installed according to
 # the distribution-specific package names defined in variables.
 #
+# Flow:
+# 1. Package Installation
+#
 # The role uses the generic package module to be compatible with various
 # package managers across different Linux distributions.
 # =============================================================================

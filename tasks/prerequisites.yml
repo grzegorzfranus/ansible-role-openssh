@@ -3,8 +3,9 @@
 # Ansible Role: OpenSSH - Prerequisites Tasks
 # =============================================================================
 # This file contains tasks to verify and handle prerequisites before installing
-# and configuring OpenSSH. It performs the following actions:
+# and configuring OpenSSH.
 #
+# Flow:
 # 1. Check for check mode execution
 # 2. Gather system facts about OpenSSH package status
 # 3. Check and verify service status

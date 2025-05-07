@@ -2,9 +2,9 @@
 # =============================================================================
 # Ansible Role: OpenSSH - Configuration Tasks
 # =============================================================================
-# This file contains tasks to configure OpenSSH server and client. It performs
-# the following actions:
+# This file contains tasks to configure OpenSSH server and client.
 #
+# Flow:
 # 1. Deploy server configuration
 # 2. Deploy client configuration (optional)
 # 3. Set up login banner

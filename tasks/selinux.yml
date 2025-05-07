@@ -6,7 +6,7 @@
 # while maintaining high security. They only run if SELinux is enabled
 # on the target system.
 #
-# Process:
+# Flow:
 # 1. Check SELinux status on the target system
 # 2. Install SELinux management tools if needed
 # 3. Configure SELinux policies for OpenSSH:

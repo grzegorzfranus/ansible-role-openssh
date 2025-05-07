@@ -13,7 +13,7 @@
 # -----------------------------------------------------------------------------
 # 1. OpenSSH Service Restart
 # -----------------------------------------------------------------------------
-- name: OpenSSH | handlers | Restart service
+- name: OpenSSH | handlers | Restart OpenSSH service
   become: true
   ansible.builtin.service:
     name: "{{ openssh_service_name }}"
