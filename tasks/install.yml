@@ -22,4 +22,4 @@
     name: "{{ openssh_packages }}"
     state: present
   when: not openssh_server_installed
-  notify: OpenSSH | handlers | Restart service
+  notify: OpenSSH | handlers | Restart OpenSSH service

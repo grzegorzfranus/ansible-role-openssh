@@ -24,7 +24,7 @@
     mode: '0600'
     backup: true
     validate: "{{ openssh_sshd_validate_command | default('/usr/sbin/sshd -t -f %s') }}"
-  notify: OpenSSH | handlers | Restart service
+  notify: OpenSSH | handlers | Restart OpenSSH service
 
 # -----------------------------------------------------------------------------
 # 2. Client Configuration
