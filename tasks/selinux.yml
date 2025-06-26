@@ -16,26 +16,26 @@
 # =============================================================================
 
 # Set the default SELinux mode to false (assume it's disabled)
-- name: "OpenSSH | selinux | Set default SELinux mode to disabled"
+- name: "🛡️ OpenSSH | selinux | Set default SELinux mode to disabled"
   ansible.builtin.set_fact:
     _selinux_mode_: false
 
 # -----------------------------------------------------------------------------
 # 1. Check SELinux Status
 # -----------------------------------------------------------------------------
-- name: "OpenSSH | selinux | Get getenforce binary of SELinux"
+- name: "🛡️ OpenSSH | selinux | Get getenforce binary of SELinux"
   ansible.builtin.stat:
     path: /usr/sbin/getenforce
   register: _getenforce_bin_
 
-- name: "OpenSSH | selinux | Collect getenforce output of SELinux"
+- name: "🛡️ OpenSSH | selinux | Collect getenforce output of SELinux"
   ansible.builtin.command: /usr/sbin/getenforce
   register: _sestatus_
   when: '_getenforce_bin_.stat.exists'
   changed_when: false
   check_mode: false
 
-- name: "OpenSSH | selinux | Set _selinux_mode_ fact if getenforce returns Enforcing or Permissive mode"
+- name: "🛡️ OpenSSH | selinux | Set _selinux_mode_ fact if getenforce returns Enforcing or Permissive mode"
   ansible.builtin.set_fact:
     _selinux_mode_: "{{ true }}"
   when:
@@ -44,7 +44,7 @@
 # -----------------------------------------------------------------------------
 # 2. Install SELinux Management Tools
 # -----------------------------------------------------------------------------
-- name: "OpenSSH | selinux | Install SELinux management packages"
+- name: "🛡️ OpenSSH | selinux | Install SELinux management packages"
   become: true
   ansible.builtin.package:
     name: "{{ item }}"
@@ -61,7 +61,7 @@
 - block:
 
     # Ensure correct SELinux file contexts for SSH configuration
-    - name: "OpenSSH | selinux | Ensure SSH directories have proper SELinux contexts"
+    - name: "🛡️ OpenSSH | selinux | Ensure SSH directories have proper SELinux contexts"
       become: true
       ansible.builtin.file:
         path: "{{ item }}"
@@ -73,7 +73,7 @@
         - "{{ openssh_sshd_config_dir }}"
 
     # Set security-focused SELinux booleans
-    - name: "OpenSSH | selinux | Set security-focused SELinux booleans for OpenSSH"
+    - name: "🛡️ OpenSSH | selinux | Set security-focused SELinux booleans for OpenSSH"
       become: true
       ansible.builtin.seboolean:
         name: "{{ item.name }}"
@@ -86,13 +86,14 @@
         - { name: "ssh_sysadm_login", value: false }
 
     # Handle non-standard SSH port
-    - name: "OpenSSH | selinux | Check if non-standard SSH port is configured"
+    - name: "🛡️ OpenSSH | selinux | Check if non-standard SSH port is configured"
       ansible.builtin.set_fact:
         _ssh_nonstandard_port_: true
-      when: openssh_port | int != 22
+      when: >
+        openssh_port | int != 22
 
     # Check if semanage is available
-    - name: "OpenSSH | selinux | Check if semanage command is available"
+    - name: "🛡️ OpenSSH | selinux | Check if semanage command is available"
       ansible.builtin.command: which semanage
       register: _semanage_check_
       changed_when: false
@@ -103,14 +104,14 @@
     # Only proceed with port configuration if semanage is available
     - block:
 
-        - name: "OpenSSH | selinux | Check if port {{ openssh_port }} is already allowed for SSH in SELinux"
+        - name: "🛡️ OpenSSH | selinux | Check if port {{ openssh_port }} is already allowed for SSH in SELinux"
           become: true
           ansible.builtin.shell: semanage port -l | grep -w 'ssh_port_t' || true
           register: _ssh_ports_
           changed_when: false
           check_mode: false
 
-        - name: "OpenSSH | selinux | Add custom SSH port {{ openssh_port }} to SELinux policy"
+        - name: "🛡️ OpenSSH | selinux | Add custom SSH port {{ openssh_port }} to SELinux policy"
           become: true
           ansible.builtin.command: semanage port -a -t ssh_port_t -p tcp {{ openssh_port }}
           when: >

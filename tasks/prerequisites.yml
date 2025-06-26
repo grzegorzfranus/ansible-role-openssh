@@ -15,29 +15,29 @@
 # -----------------------------------------------------------------------------
 # 1. Execution Mode Check
 # -----------------------------------------------------------------------------
-- name: OpenSSH | prerequisites | Set fact for check mode status
+- name: 🔍 OpenSSH | prerequisites | Set fact for check mode status
   ansible.builtin.set_fact:
     openssh_check_mode: "{{ ansible_check_mode }}"
 
 # -----------------------------------------------------------------------------
 # 2. Package Status Check
 # -----------------------------------------------------------------------------
-- name: OpenSSH | prerequisites | Check if OpenSSH package is installed
+- name: 🔍 OpenSSH | prerequisites | Check if OpenSSH package is installed
   become: true
   ansible.builtin.package_facts:
     manager: auto
 
-- name: OpenSSH | prerequisites | Set fact for OpenSSH package status
+- name: 🔍 OpenSSH | prerequisites | Set fact for OpenSSH package status
   ansible.builtin.set_fact:
     openssh_server_installed: "{{ ('openssh-server' in ansible_facts.packages) or ('openssh' in ansible_facts.packages) }}"
 
 # -----------------------------------------------------------------------------
 # 3. Service Status Check
 # -----------------------------------------------------------------------------
-- name: OpenSSH | prerequisites | Gather service facts
+- name: 🔍 OpenSSH | prerequisites | Gather service facts
   ansible.builtin.service_facts:
 
-- name: OpenSSH | prerequisites | Set fact for OpenSSH service status
+- name: 🔍 OpenSSH | prerequisites | Set fact for OpenSSH service status
   ansible.builtin.set_fact:
     openssh_service_active: "{{ (ansible_facts.services['ssh.service'] is defined and ansible_facts.services['ssh.service'].state == 'running') or
                                 (ansible_facts.services['sshd.service'] is defined and ansible_facts.services['sshd.service'].state == 'running') }}"
@@ -45,12 +45,12 @@
 # -----------------------------------------------------------------------------
 # 4. Directory Structure Setup
 # -----------------------------------------------------------------------------
-- name: OpenSSH | prerequisites | Check if sshd_config.d directory exists
+- name: 🔍 OpenSSH | prerequisites | Check if sshd_config.d directory exists
   ansible.builtin.stat:
     path: "{{ openssh_sshd_config_dir }}"
   register: openssh_config_dir
 
-- name: OpenSSH | prerequisites | Create sshd_config.d directory if it doesn't exist
+- name: 🛠️ OpenSSH | prerequisites | Create sshd_config.d directory if it doesn't exist
   become: true
   ansible.builtin.file:
     path: "{{ openssh_sshd_config_dir }}"
@@ -58,4 +58,5 @@
     mode: '0755'
     owner: "root"
     group: "root"
-  when: not openssh_config_dir.stat.exists
+  when: >
+    not openssh_config_dir.stat.exists

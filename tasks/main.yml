@@ -19,7 +19,7 @@
 # -----------------------------------------------------------------------------
 # 1. Operating System Validation
 # -----------------------------------------------------------------------------
-- name: OpenSSH | main | Check supported operating system
+- name: 🧪 OpenSSH | main | Check supported operating system
   become: true
   ansible.builtin.fail:
     msg: "Unsupported OS family: {{ ansible_os_family }}. This role supports Debian and RedHat OS families only."
@@ -30,7 +30,7 @@
 # -----------------------------------------------------------------------------
 # 2. OS-Specific Variables
 # -----------------------------------------------------------------------------
-- name: OpenSSH | main | Load OS-specific variables
+- name: 📂 OpenSSH | main | Load OS-specific variables
   ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
@@ -50,7 +50,7 @@
 # -----------------------------------------------------------------------------
 # 3. Variable Validation
 # -----------------------------------------------------------------------------
-- name: OpenSSH | main | Validate role variables
+- name: 🧪 OpenSSH | main | Validate role variables
   ansible.builtin.include_tasks: assert.yml
   tags:
     - always
@@ -59,7 +59,7 @@
 # -----------------------------------------------------------------------------
 # 4. System Prerequisites
 # -----------------------------------------------------------------------------
-- name: OpenSSH | main | Verify system prerequisites
+- name: 🛠️ OpenSSH | main | Verify system prerequisites
   ansible.builtin.include_tasks: prerequisites.yml
   when: >
     openssh_role_action in ['all', 'install']
@@ -70,7 +70,7 @@
 # -----------------------------------------------------------------------------
 # 5. Package Installation
 # -----------------------------------------------------------------------------
-- name: OpenSSH | main | Install OpenSSH packages
+- name: 📦 OpenSSH | main | Install OpenSSH packages
   ansible.builtin.include_tasks: install.yml
   when: >
     openssh_role_action in ['all', 'install']
@@ -81,7 +81,7 @@
 # -----------------------------------------------------------------------------
 # 6. SELinux Configuration (if applicable)
 # -----------------------------------------------------------------------------
-- name: OpenSSH | main | Configure SELinux for OpenSSH
+- name: 🛡️ OpenSSH | main | Configure SELinux for OpenSSH
   ansible.builtin.include_tasks: selinux.yml
   when: >
     openssh_role_action in ['all', 'install', 'config']
@@ -93,7 +93,7 @@
 # -----------------------------------------------------------------------------
 # 7. Service Configuration
 # -----------------------------------------------------------------------------
-- name: OpenSSH | main | Configure OpenSSH service
+- name: 🌐 OpenSSH | main | Configure OpenSSH service
   ansible.builtin.include_tasks: configure.yml
   when: >
     openssh_role_action in ['all', 'config']

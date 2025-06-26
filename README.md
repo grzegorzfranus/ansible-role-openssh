@@ -1,22 +1,45 @@
 # Ansible Role: OpenSSH
 
-|Source|Version|CI|License|
+|Source|Version|Tests|License|
 |------|-------|-------|-------|
-|[![Source Code](https://img.shields.io/badge/source-github-blue.svg)](https://github.com/grzegorzfranus/ansible-role-openssh)|[![Version](https://img.shields.io/github/v/release/grzegorzfranus/ansible-role-openssh)](https://github.com/grzegorzfranus/ansible-role-openssh/releases)|[![tests](https://github.com/grzegorzfranus/ansible-role-openssh/actions/workflows/ci.yml/badge.svg)](https://github.com/grzegorzfranus/ansible-role-openssh/actions)|[![Repository License](https://img.shields.io/badge/license-apache2.0-brightgreen.svg)](LICENSE)|
+|[![Source Code](https://img.shields.io/badge/source-github-blue.svg)](https://github.com/grzegorzfranus/ansible-role-openssh)|[![Version](https://img.shields.io/github/v/release/grzegorzfranus/ansible-role-openssh)](https://github.com/grzegorzfranus/ansible-role-openssh/releases)|[![tests](https://github.com/grzegorzfranus/ansible-role-openssh/actions/workflows/test-and-validation.yml/badge.svg)](https://github.com/grzegorzfranus/ansible-role-openssh/actions)|[![Repository License](https://img.shields.io/badge/license-apache2.0-brightgreen.svg)](LICENSE)|
 
-This Ansible role installs and configures OpenSSH, a secure and widely-used implementation of the SSH protocol, for both server and client functionality. It focuses on implementing security best practices by default, providing a hardened SSH configuration while maintaining flexibility for customization.
+This Ansible role installs and configures OpenSSH, a secure and widely-used implementation of the SSH protocol for both server and client functionality. It provides enterprise-grade security hardening by default while maintaining operational flexibility for various deployment scenarios.
 
-## Main Actions
+## ✨ Features
 
-- Verify and handle system requirements
-- Install OpenSSH packages
-- Configure SSH server with security hardening
-- Set up SELinux policies for OpenSSH (if applicable)
-- Configure SSH client (optional)
-- Deploy security-focused login banner
-- Enable and manage the SSH service
+- 🔐 **Security-First Approach**: Hardened SSH configuration with modern cryptographic standards
+- 🧰 **Comprehensive Configuration**: Complete SSH server and client setup with extensive customization
+- 🛡️ **Security Hardening**: Disabled insecure features, strong ciphers, and authentication controls
+- 🌐 **Multi-Platform Support**: Full compatibility across Debian, Ubuntu, and RedHat-based systems
+- 🚀 **Service Management**: Complete systemd service configuration and state management
+- 📊 **Access Control**: User/group-based authentication and connection restrictions
+- 🔑 **Authentication Methods**: Public key, password, and advanced authentication support
+- 🛠️ **SELinux Integration**: Comprehensive SELinux policy management and configuration
+- 📝 **Custom Banners**: Security-focused login banner deployment
+- 🧪 **Validation Framework**: Extensive variable validation and system compatibility checks
+- 🔄 **Zero-Downtime Updates**: Safe configuration updates with service restart handling
+- 📦 **Client Configuration**: Optional SSH client configuration management
 
-## Requirements
+## 🎯 Architecture
+
+The role provides a flexible SSH architecture supporting various deployment patterns:
+
+- **Server Mode**: Secure SSH daemon for remote access
+- **Client Mode**: SSH client configuration for outbound connections
+- **Hybrid Mode**: Combined server and client functionality
+- **Bastion Host**: Enhanced security for jump host configurations
+
+```
+SSH Clients ←→ OpenSSH Server ←→ Target Servers
+   (remote)      (this host)        (backend)
+```
+
+## 📋 Requirements
+
+- **Ansible**: 2.15 or higher
+- **Network**: Secure network connectivity for SSH access
+- **Privileges**: sudo/root access on target hosts
 
 ### Supported operating systems
 List of officially supported operating systems:
@@ -41,15 +64,92 @@ Python >= 3.9
 The role uses facts gathered by Ansible on the remote host. If you disable the Setup module in your playbook, the role will not work properly.
 
 ### Root access
-This role requires root access, so either configure it in your inventory files, run it in a playbook with a global `become: true` or invoke the role in your playbook like:
+This role requires root access for some tasks. Make sure that you are using a user with root privileges.
+
+## 🚀 Quick Start
+
+### 1. Basic SSH Server Setup
+
 ```yaml
-- hosts: servers
+---
+- name: Configure SSH Server
+  hosts: all
   become: true
+  roles:
+    - role: grzegorzfranus.openssh
+      vars:
+        openssh_service_enabled: true
+        openssh_permit_root_login: "no"
+        openssh_password_authentication: false
+```
+
+### 2. Enhanced Security Configuration
+
+```yaml
+---
+- name: Configure Hardened SSH Server
+  hosts: servers
+  become: true
+  roles:
+    - role: grzegorzfranus.openssh
+      vars:
+        openssh_port: 2222
+        openssh_allow_users: ["admin", "operator"]
+        openssh_max_auth_tries: 2
+        openssh_client_alive_interval: 300
+```
+
+### 3. Run the playbook
+
+```bash
+ansible-playbook -i inventory openssh-setup.yml
+```
+
+## ⚙️ Configuration
+
+### Default Configuration
+
+The role comes with production-ready security defaults:
+
+```yaml
+# Security settings
+openssh_permit_root_login: "no"
+openssh_password_authentication: false
+openssh_pubkey_authentication: true
+
+# Connection settings
+openssh_port: 22
+openssh_client_alive_interval: 180
+openssh_max_sessions: 5
+
+# Cryptographic settings
+openssh_ciphers:
+  - "chacha20-poly1305@openssh.com"
+  - "aes256-gcm@openssh.com"
+```
+
+### Advanced Configuration
+
+Customize for specific security requirements:
+
+```yaml
+---
+- name: Advanced OpenSSH Configuration
+  hosts: all
+  become: true
+  vars:
+    openssh_role_action: "all"
+    openssh_configure_client: true
+    openssh_allow_groups: ["sshusers"]
+    openssh_deny_users: ["guest", "anonymous"]
+    openssh_custom_options:
+      - "MaxStartups 10:30:100"
+      - "LoginGraceTime 30"
   roles:
     - role: grzegorzfranus.openssh
 ```
 
-## Role Variables
+## 📊 Variables
 
 ### 1. General Settings
 
@@ -216,16 +316,179 @@ openssh_custom_options:
   - "MaxStartups 10:30:100"
 ```
 
-## Tags
+## 🔍 Verification
+
+After deployment, verify SSH configuration and connectivity:
+
+### Check SSH Service Status
+
+```bash
+# Check service status
+sudo systemctl status ssh
+
+# Verify SSH configuration syntax
+sudo sshd -t
+
+# Check listening ports
+sudo ss -tulpn | grep :22
+```
+
+### Test SSH Connectivity
+
+```bash
+# Test SSH connection (adjust port if needed)
+ssh -p 22 user@hostname
+
+# Verify SSH configuration
+ssh -G hostname
+
+# Test with verbose output
+ssh -v user@hostname
+```
+
+### Security Validation
+
+```bash
+# Check SSH host keys
+sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+
+# Verify configuration file permissions
+ls -la /etc/ssh/
+
+# Check active SSH sessions
+sudo netstat -tnpa | grep 'ESTABLISHED.*:22'
+```
+
+## 🛡️ Security Features
+
+- ✅ **Secure Default Configuration**: Hardened settings with security-first approach
+- ✅ **Modern Cryptography**: ChaCha20-Poly1305, AES-GCM, and Ed25519 algorithms
+- ✅ **Authentication Controls**: Public key authentication with password disable by default
+- ✅ **Access Control**: User/group-based restrictions and connection limits
+- ✅ **Network Security**: Disabled forwarding features and DNS security
+- ✅ **Session Management**: Timeout controls and connection limits
+- ✅ **SELinux Integration**: Comprehensive SELinux policy configuration
+- ✅ **File Permissions**: Proper ownership and permissions for all SSH files
+- ✅ **Audit Logging**: Verbose logging with syslog integration
+
+### Enhanced Security Configuration
+
+```yaml
+---
+- name: Maximum Security SSH Configuration
+  hosts: critical_servers
+  become: true
+  vars:
+    openssh_port: 2222
+    openssh_permit_root_login: "no"
+    openssh_password_authentication: false
+    openssh_max_auth_tries: 2
+    openssh_allow_groups: ["sshusers"]
+    openssh_client_alive_interval: 300
+    openssh_client_alive_count_max: 2
+    openssh_log_level: "VERBOSE"
+    openssh_use_dns: false
+    openssh_strict_modes: true
+  roles:
+    - role: grzegorzfranus.openssh
+```
+
+## 📁 Project Directory Structure
+
+```
+ansible-role-openssh/
+├── defaults/
+│   └── main.yml             # Default variable definitions and secure configuration
+├── handlers/
+│   └── main.yml             # Service restart and reload handlers
+├── meta/
+│   └── main.yml             # Role metadata and dependency information
+├── tasks/
+│   ├── main.yml             # Main task orchestration and flow control
+│   ├── assert.yml           # Variable validation and system compatibility checks
+│   ├── prerequisites.yml    # System preparation and package repository setup
+│   ├── install.yml          # OpenSSH package installation and verification
+│   ├── configure.yml        # SSH server and client configuration management
+│   └── selinux.yml          # SELinux policy configuration and management
+├── templates/
+│   └── ssh/
+│       ├── banner.j2        # Security banner template
+│       ├── ssh_config.j2    # SSH client configuration template
+│       └── sshd_config.j2   # SSH daemon configuration template
+└── vars/
+    ├── main.yml             # Internal role variables and constants
+    ├── debian.yml           # Debian-specific variables and package names
+    └── redhat.yml           # RedHat-specific variables and package names
+```
+
+## 🏷️ Tags
 
 - `always` - Tasks that always run (variable loading and validation)
-- `setup` - Installation and initial setup tasks
-- `prerequisites` - System requirement verification tasks
-- `install` - Package installation tasks
-- `selinux` - SELinux configuration tasks
-- `security` - Security-related configuration tasks
-- `configure` - Configuration tasks for SSH server and client
-- `validate` - Variable validation tasks
+- `setup` - Setup tasks including OS-specific variables, requirements, installation, and configuration
+- `prerequisites` - System requirement verification and preparation tasks
+- `install` - OpenSSH package installation tasks
+- `selinux` - SELinux configuration and policy management tasks
+- `security` - Security-related configuration and hardening tasks
+- `configure` - SSH server and client configuration tasks
+- `validate` - Variable validation and system compatibility checks
+
+## 🧪 Testing
+
+This role includes comprehensive Molecule tests that validate functionality across all supported operating systems:
+
+- **Ubuntu 22.04 LTS** - Complete functionality testing
+- **Ubuntu 24.04 LTS** - Complete functionality testing  
+- **Debian 12** - Complete functionality testing
+- **Debian 11** - Complete functionality testing
+- **Rocky Linux 9** - Complete functionality testing
+
+### Running Tests Locally
+
+```bash
+# Install testing dependencies
+pip install molecule molecule-plugins[docker] ansible-lint
+
+# Run all tests
+molecule test
+
+# Run tests for specific platform
+MOLECULE_DISTRO=ubuntu2204 molecule test
+
+# Test only linting
+molecule lint
+```
+
+### Test Matrix
+
+The test suite verifies:
+- ✅ **Package Installation**: Correct OpenSSH package installation
+- ✅ **Service Management**: Service enablement and startup
+- ✅ **Configuration**: Proper SSH server and client configuration
+- ✅ **Security Settings**: Cryptographic algorithms and authentication methods
+- ✅ **Permissions**: File and directory security validation
+- ✅ **SELinux**: SELinux policy configuration when applicable
+- ✅ **Connectivity**: SSH service accessibility and functionality
+
+## 🔧 CI/CD Integration
+
+This role includes comprehensive GitHub Actions workflows for automated testing and deployment:
+
+### Testing Pipeline 🧪
+- **Workflow**: `.github/workflows/test-and-validation.yml`
+- **Name**: `🧪 Test & Validation Pipeline`
+- **Purpose**: Automated testing across multiple platforms
+- **Triggers**: Push to main branch, pull requests
+- **Features**:
+  - Multi-platform testing (Ubuntu 22.04, 24.04, Debian 11, 12, Rocky Linux 9)
+  - Ansible lint validation
+  - Molecule test execution
+  - Cross-platform compatibility verification
+
+### Galaxy Publishing 📦
+- **Workflow**: `.github/workflows/publish-to-galaxy.yml`
+- **Name**: `📦 Publish to Ansible Galaxy`
+- **Purpose**: Automated role publishing to Ansible Galaxy
+- **Triggers**: Tagged releases (v*)
 
 ## Example Playbooks
 
@@ -299,15 +562,53 @@ openssh_custom_options:
           forward_x11: false
 ```
 
-## License
+### High-Security Bastion Host
 
-Apache-2.0
+```yaml
+---
+- name: Configure Bastion Host with Maximum Security
+  hosts: bastion_hosts
+  become: true
+  roles:
+    - role: grzegorzfranus.openssh
+      vars:
+        # Non-standard port
+        openssh_port: 2222
+        
+        # Strict authentication
+        openssh_permit_root_login: "no"
+        openssh_password_authentication: false
+        openssh_max_auth_tries: 2
+        openssh_login_grace_time: 30
+        
+        # Restricted access
+        openssh_allow_groups: ["bastion-users"]
+        openssh_max_sessions: 3
+        openssh_max_startups: "3:50:5"
+        
+        # Enhanced monitoring
+        openssh_log_level: "VERBOSE"
+        openssh_client_alive_interval: 300
+        openssh_client_alive_count_max: 2
+        
+        # Disabled features
+        openssh_tcp_forwarding: false
+        openssh_agent_forwarding: false
+        openssh_x11_forwarding: false
+        openssh_permit_tunnel: false
+        
+        # Strong cryptography only
+        openssh_ciphers:
+          - "chacha20-poly1305@openssh.com"
+        openssh_macs:
+          - "hmac-sha2-512-etm@openssh.com"
+        openssh_kex_algorithms:
+          - "curve25519-sha256@libssh.org"
+        openssh_host_key_algorithms:
+          - "ssh-ed25519"
+```
 
-## Author Information
-
-This role was created by [Grzegorz Franus](https://github.com/grzegorzfranus).
-
-## Contributing
+## 🤝 Contributing
 
 Contributions, bug reports, and feature requests are welcome!
 
@@ -318,3 +619,11 @@ Contributions, bug reports, and feature requests are welcome!
 - For major changes, please open an issue first to discuss what you would like to change.
 
 If you have questions or suggestions, feel free to open an issue or contact the author via GitHub.
+
+## 📝 License
+
+This project is licensed under the Apache-2.0 License - see the LICENSE file for details.
+
+## 👥 Author Information
+
+This role was created by [Grzegorz Franus](https://github.com/grzegorzfranus).

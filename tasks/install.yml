@@ -16,10 +16,8 @@
 # -----------------------------------------------------------------------------
 # Package Installation
 # -----------------------------------------------------------------------------
-- name: OpenSSH | install | Install OpenSSH packages
+- name: 📦 OpenSSH | install | Install OpenSSH packages
   become: true
   ansible.builtin.package:
     name: "{{ openssh_packages }}"
     state: present
-  when: not openssh_server_installed
-  notify: OpenSSH | handlers | Restart OpenSSH service

@@ -19,71 +19,71 @@
 # -----------------------------------------------------------------------------
 # 1. General Settings
 # -----------------------------------------------------------------------------
-- name: OpenSSH | assert | Validate role action parameter
-  assert:
+- name: 🧪 OpenSSH | assert | Validate role action parameter
+  ansible.builtin.assert:
     that:
       - openssh_role_action is defined
       - openssh_role_action is string
-      - openssh_role_action in [ "all", "install", "config" ]
-    quiet: true
-    fail_msg: "openssh_role_action must be one of: all, install, config"
+      - openssh_role_action in ["all", "install", "config"]
+    fail_msg: "❌ Invalid role action '{{ openssh_role_action | default('undefined') }}'. Must be one of: all, install, config"
+    success_msg: "✅ Role action parameter is valid: {{ openssh_role_action }}"
 
-- name: OpenSSH | assert | Validate service enabled parameter
-  assert:
+- name: 🧪 OpenSSH | assert | Validate service enabled parameter
+  ansible.builtin.assert:
     that:
       - openssh_service_enabled is defined
       - openssh_service_enabled is boolean
-    quiet: true
-    fail_msg: "openssh_service_enabled must be a boolean (true/false)"
+    fail_msg: "❌ Invalid service enabled setting '{{ openssh_service_enabled | default('undefined') }}'. Must be boolean (true/false)"
+    success_msg: "✅ Service enabled parameter is valid: {{ openssh_service_enabled }}"
 
 # -----------------------------------------------------------------------------
 # 2. SSH Server Settings
 # -----------------------------------------------------------------------------
-- name: OpenSSH | assert | Validate sshd config path
-  assert:
+- name: 🧪 OpenSSH | assert | Validate sshd config path
+  ansible.builtin.assert:
     that:
       - openssh_sshd_config_path is defined
       - openssh_sshd_config_path is string
-    quiet: true
-    fail_msg: "openssh_sshd_config_path must be a valid file path string"
+    fail_msg: "❌ Invalid sshd config path '{{ openssh_sshd_config_path | default('undefined') }}'. Must be a valid file path string"
+    success_msg: "✅ SSH daemon config path is valid: {{ openssh_sshd_config_path }}"
 
-- name: OpenSSH | assert | Validate sshd config directory
-  assert:
+- name: 🧪 OpenSSH | assert | Validate sshd config directory
+  ansible.builtin.assert:
     that:
       - openssh_sshd_config_dir is defined
       - openssh_sshd_config_dir is string
-    quiet: true
-    fail_msg: "openssh_sshd_config_dir must be a valid directory path string"
+    fail_msg: "❌ Invalid sshd config directory '{{ openssh_sshd_config_dir | default('undefined') }}'. Must be a valid directory path string"
+    success_msg: "✅ SSH daemon config directory is valid: {{ openssh_sshd_config_dir }}"
 
-- name: OpenSSH | assert | Validate SSH port number
-  assert:
+- name: 🧪 OpenSSH | assert | Validate SSH port number
+  ansible.builtin.assert:
     that:
       - openssh_port is defined
       - openssh_port is number
       - openssh_port > 0
       - openssh_port <= 65535
-    quiet: true
-    fail_msg: "openssh_port must be a number between 1 and 65535"
+    fail_msg: "❌ Invalid SSH port '{{ openssh_port | default('undefined') }}'. Must be between 1 and 65535"
+    success_msg: "✅ SSH port is valid: {{ openssh_port }}"
 
-- name: OpenSSH | assert | Validate SSH protocol version
-  assert:
+- name: 🧪 OpenSSH | assert | Validate SSH protocol version
+  ansible.builtin.assert:
     that:
       - openssh_protocol is defined
       - openssh_protocol is number
       - openssh_protocol == 2
-    quiet: true
-    fail_msg: "openssh_protocol must be set to 2 (SSH protocol 1 is insecure and obsolete)"
+    fail_msg: "❌ Invalid SSH protocol '{{ openssh_protocol | default('undefined') }}'. Must be 2 (SSH protocol 1 is insecure and obsolete)"
+    success_msg: "✅ SSH protocol version is valid: {{ openssh_protocol }}"
 
-- name: OpenSSH | assert | Validate listen addresses
-  assert:
+- name: 🧪 OpenSSH | assert | Validate listen addresses
+  ansible.builtin.assert:
     that:
       - openssh_listen_addresses is defined
       - openssh_listen_addresses is sequence
-    quiet: true
-    fail_msg: "openssh_listen_addresses must be a list of IP addresses"
+    fail_msg: "❌ Invalid listen addresses list '{{ openssh_listen_addresses | default('undefined') }}'. Must be a list of IP addresses"
+    success_msg: "✅ Listen addresses list is valid with {{ openssh_listen_addresses | length }} entries"
 
-- name: OpenSSH | assert | Validate forwarding settings
-  assert:
+- name: 🧪 OpenSSH | assert | Validate forwarding settings
+  ansible.builtin.assert:
     that:
       - openssh_tcp_forwarding is defined
       - openssh_tcp_forwarding is boolean
@@ -91,35 +91,35 @@
       - openssh_agent_forwarding is boolean
       - openssh_x11_forwarding is defined
       - openssh_x11_forwarding is boolean
-    quiet: true
-    fail_msg: "openssh forwarding settings must be boolean values"
+    fail_msg: "❌ Invalid forwarding settings. All forwarding options must be boolean values"
+    success_msg: "✅ Forwarding settings are valid: TCP={{ openssh_tcp_forwarding }}, Agent={{ openssh_agent_forwarding }}, X11={{ openssh_x11_forwarding }}"
 
-- name: OpenSSH | assert | Validate tunnel permission setting
-  assert:
+- name: 🧪 OpenSSH | assert | Validate tunnel permission setting
+  ansible.builtin.assert:
     that:
       - openssh_permit_tunnel is defined
       - openssh_permit_tunnel is boolean
-    quiet: true
-    fail_msg: "openssh_permit_tunnel must be a boolean value"
+    fail_msg: "❌ Invalid tunnel permission '{{ openssh_permit_tunnel | default('undefined') }}'. Must be boolean value"
+    success_msg: "✅ Tunnel permission setting is valid: {{ openssh_permit_tunnel }}"
 
-- name: OpenSSH | assert | Validate gateway ports setting
-  assert:
+- name: 🧪 OpenSSH | assert | Validate gateway ports setting
+  ansible.builtin.assert:
     that:
       - openssh_gateway_ports is defined
       - openssh_gateway_ports is boolean
-    quiet: true
-    fail_msg: "openssh_gateway_ports must be a boolean value"
+    fail_msg: "❌ Invalid gateway ports setting '{{ openssh_gateway_ports | default('undefined') }}'. Must be boolean value"
+    success_msg: "✅ Gateway ports setting is valid: {{ openssh_gateway_ports }}"
 
-- name: OpenSSH | assert | Validate disable forwarding flag
-  assert:
+- name: 🧪 OpenSSH | assert | Validate disable forwarding flag
+  ansible.builtin.assert:
     that:
       - openssh_disable_forwarding is defined
       - openssh_disable_forwarding is boolean
-    quiet: true
-    fail_msg: "openssh_disable_forwarding must be a boolean value"
+    fail_msg: "❌ Invalid disable forwarding flag '{{ openssh_disable_forwarding | default('undefined') }}'. Must be boolean value"
+    success_msg: "✅ Disable forwarding flag is valid: {{ openssh_disable_forwarding }}"
 
-- name: OpenSSH | assert | Validate banner and MOTD settings
-  assert:
+- name: 🧪 OpenSSH | assert | Validate banner and MOTD settings
+  ansible.builtin.assert:
     that:
       - openssh_print_motd is defined
       - openssh_print_motd is boolean
@@ -127,11 +127,11 @@
       - openssh_print_last_log is boolean
       - openssh_banner_path is defined
       - openssh_banner_path is string
-    quiet: true
-    fail_msg: "banner/motd settings contain invalid values"
+    fail_msg: "❌ Invalid banner/MOTD settings. All settings must be properly configured"
+    success_msg: "✅ Banner and MOTD settings are valid: MOTD={{ openssh_print_motd }}, LastLog={{ openssh_print_last_log }}, Path={{ openssh_banner_path }}"
 
-- name: OpenSSH | assert | Validate session timeout settings
-  assert:
+- name: 🧪 OpenSSH | assert | Validate session timeout settings
+  ansible.builtin.assert:
     that:
       - openssh_client_alive_interval is defined
       - openssh_client_alive_interval is number
@@ -139,34 +139,34 @@
       - openssh_client_alive_count_max is defined
       - openssh_client_alive_count_max is number
       - openssh_client_alive_count_max >= 0
-    quiet: true
-    fail_msg: "session timeout settings must be non-negative numbers"
+    fail_msg: "❌ Invalid session timeout settings. Must be non-negative numbers"
+    success_msg: "✅ Session timeout settings are valid: Interval={{ openssh_client_alive_interval }}s, MaxCount={{ openssh_client_alive_count_max }}"
 
-- name: OpenSSH | assert | Validate maximum session limits
-  assert:
+- name: 🧪 OpenSSH | assert | Validate maximum session limits
+  ansible.builtin.assert:
     that:
       - openssh_max_sessions is defined
       - openssh_max_sessions is number
       - openssh_max_sessions > 0
       - openssh_max_startups is defined
       - openssh_max_startups is string
-    quiet: true
-    fail_msg: "max session settings contain invalid values"
+    fail_msg: "❌ Invalid session limits settings. Check maximum sessions and startup configuration"
+    success_msg: "✅ Session limits are valid: MaxSessions={{ openssh_max_sessions }}, MaxStartups={{ openssh_max_startups }}"
 
 # -----------------------------------------------------------------------------
 # 3. Authentication Settings
 # -----------------------------------------------------------------------------
-- name: OpenSSH | assert | Validate root login permissions
-  assert:
+- name: 🧪 OpenSSH | assert | Validate root login permissions
+  ansible.builtin.assert:
     that:
       - openssh_permit_root_login is defined
       - openssh_permit_root_login is string
       - openssh_permit_root_login in ["yes", "no", "without-password", "prohibit-password"]
-    quiet: true
-    fail_msg: "openssh_permit_root_login must be one of: yes, no, without-password, prohibit-password"
+    fail_msg: "❌ openssh_permit_root_login must be one of: yes, no, without-password, prohibit-password"
+    success_msg: "✅ Root login permissions are valid: {{ openssh_permit_root_login }}"
 
-- name: OpenSSH | assert | Validate password authentication settings
-  assert:
+- name: 🧪 OpenSSH | assert | Validate password authentication settings
+  ansible.builtin.assert:
     that:
       - openssh_permit_empty_passwords is defined
       - openssh_permit_empty_passwords is boolean
@@ -174,37 +174,37 @@
       - openssh_password_authentication is boolean
       - openssh_pubkey_authentication is defined
       - openssh_pubkey_authentication is boolean
-    quiet: true
-    fail_msg: "password and authentication settings must be boolean values"
+    fail_msg: "❌ password and authentication settings must be boolean values"
+    success_msg: "✅ Password authentication settings are valid: EmptyPwd={{ openssh_permit_empty_passwords }}, PwdAuth={{ openssh_password_authentication }}, PubKey={{ openssh_pubkey_authentication }}"
 
-- name: OpenSSH | assert | Validate host-based authentication settings
-  assert:
+- name: 🧪 OpenSSH | assert | Validate host-based authentication settings
+  ansible.builtin.assert:
     that:
       - openssh_host_based_auth is defined
       - openssh_host_based_auth is boolean
       - openssh_challenge_response_auth is defined
       - openssh_challenge_response_auth is boolean
-    quiet: true
-    fail_msg: "host-based authentication settings must be boolean values"
+    fail_msg: "❌ host-based authentication settings must be boolean values"
+    success_msg: "✅ Host-based authentication settings are valid: HostBased={{ openssh_host_based_auth }}, Challenge={{ openssh_challenge_response_auth }}"
 
-- name: OpenSSH | assert | Validate rhosts configuration
-  assert:
+- name: 🧪 OpenSSH | assert | Validate rhosts configuration
+  ansible.builtin.assert:
     that:
       - openssh_ignore_rhosts is defined
       - openssh_ignore_rhosts is boolean
-    quiet: true
-    fail_msg: "openssh_ignore_rhosts must be a boolean value"
+    fail_msg: "❌ openssh_ignore_rhosts must be a boolean value"
+    success_msg: "✅ Rhosts configuration is valid: {{ openssh_ignore_rhosts }}"
 
-- name: OpenSSH | assert | Validate user environment permission
-  assert:
+- name: 🧪 OpenSSH | assert | Validate user environment permission
+  ansible.builtin.assert:
     that:
       - openssh_permit_user_environment is defined
       - openssh_permit_user_environment is boolean
-    quiet: true
-    fail_msg: "openssh_permit_user_environment must be a boolean value"
+    fail_msg: "❌ openssh_permit_user_environment must be a boolean value"
+    success_msg: "✅ User environment permission is valid: {{ openssh_permit_user_environment }}"
 
-- name: OpenSSH | assert | Validate Kerberos and GSSAPI settings
-  assert:
+- name: 🧪 OpenSSH | assert | Validate Kerberos and GSSAPI settings
+  ansible.builtin.assert:
     that:
       - openssh_kerberos_auth is defined
       - openssh_kerberos_auth is boolean
@@ -214,11 +214,11 @@
       - openssh_gssapi_auth is boolean
       - openssh_gssapi_cleanup_credentials is defined
       - openssh_gssapi_cleanup_credentials is boolean
-    quiet: true
-    fail_msg: "Kerberos/GSSAPI settings must be boolean values"
+    fail_msg: "❌ Kerberos/GSSAPI settings must be boolean values"
+    success_msg: "✅ Kerberos and GSSAPI settings are valid: Kerberos={{ openssh_kerberos_auth }}, GSSAPI={{ openssh_gssapi_auth }}"
 
-- name: OpenSSH | assert | Validate allow and deny user/group lists
-  assert:
+- name: 🧪 OpenSSH | assert | Validate allow and deny user/group lists
+  ansible.builtin.assert:
     that:
       - openssh_allow_users is defined
       - openssh_allow_users is sequence
@@ -228,31 +228,31 @@
       - openssh_deny_users is sequence
       - openssh_deny_groups is defined
       - openssh_deny_groups is sequence
-    quiet: true
-    fail_msg: "allow/deny lists must be lists (empty lists are allowed)"
+    fail_msg: "❌ allow/deny lists must be lists (empty lists are allowed)"
+    success_msg: "✅ User/group access lists are valid: Allow={{ openssh_allow_users | length + openssh_allow_groups | length }} entries, Deny={{ openssh_deny_users | length + openssh_deny_groups | length }} entries"
 
-- name: OpenSSH | assert | Validate authorized keys file path
-  assert:
+- name: 🧪 OpenSSH | assert | Validate authorized keys file path
+  ansible.builtin.assert:
     that:
       - openssh_authorized_keys_file is defined
       - openssh_authorized_keys_file is string
-    quiet: true
-    fail_msg: "openssh_authorized_keys_file must be a valid file path string"
+    fail_msg: "❌ openssh_authorized_keys_file must be a valid file path string"
+    success_msg: "✅ Authorized keys file path is valid: {{ openssh_authorized_keys_file }}"
 
-- name: OpenSSH | assert | Validate maximum authentication attempts
-  assert:
+- name: 🧪 OpenSSH | assert | Validate maximum authentication attempts
+  ansible.builtin.assert:
     that:
       - openssh_max_auth_tries is defined
       - openssh_max_auth_tries is number
       - openssh_max_auth_tries > 0
-    quiet: true
-    fail_msg: "openssh_max_auth_tries must be a positive number"
+    fail_msg: "❌ openssh_max_auth_tries must be a positive number"
+    success_msg: "✅ Maximum authentication attempts is valid: {{ openssh_max_auth_tries }}"
 
 # -----------------------------------------------------------------------------
 # 4. Network Settings
 # -----------------------------------------------------------------------------
-- name: OpenSSH | assert | Validate network and connectivity settings
-  assert:
+- name: 🧪 OpenSSH | assert | Validate network and connectivity settings
+  ansible.builtin.assert:
     that:
       - openssh_use_dns is defined
       - openssh_use_dns is boolean
@@ -263,22 +263,22 @@
       - openssh_gateway_ports is boolean
       - openssh_accept_env is defined
       - openssh_accept_env is sequence
-    quiet: true
-    fail_msg: "network settings contain invalid values"
+    fail_msg: "❌ network settings contain invalid values"
+    success_msg: "✅ Network settings are valid: DNS={{ openssh_use_dns }}, Family={{ openssh_address_family }}, AcceptEnv={{ openssh_accept_env | length }} vars"
 
 # -----------------------------------------------------------------------------
 # 5. Security Settings
 # -----------------------------------------------------------------------------
-- name: OpenSSH | assert | Validate strict mode setting
-  assert:
+- name: 🧪 OpenSSH | assert | Validate strict mode setting
+  ansible.builtin.assert:
     that:
       - openssh_strict_modes is defined
       - openssh_strict_modes is boolean
-    quiet: true
-    fail_msg: "openssh_strict_modes must be a boolean value"
+    fail_msg: "❌ openssh_strict_modes must be a boolean value"
+    success_msg: "✅ Strict mode setting is valid: {{ openssh_strict_modes }}"
 
-- name: OpenSSH | assert | Validate security algorithm configurations
-  assert:
+- name: 🧪 OpenSSH | assert | Validate security algorithm configurations
+  ansible.builtin.assert:
     that:
       - openssh_ciphers is defined
       - openssh_ciphers is sequence
@@ -292,89 +292,89 @@
       - openssh_host_key_algorithms is defined
       - openssh_host_key_algorithms is sequence
       - openssh_host_key_algorithms | length > 0
-    quiet: true
-    fail_msg: "cipher and algorithm lists must be non-empty lists"
+    fail_msg: "❌ cipher and algorithm lists must be non-empty lists"
+    success_msg: "✅ Security algorithms are valid: Ciphers={{ openssh_ciphers | length }}, MACs={{ openssh_macs | length }}, KEX={{ openssh_kex_algorithms | length }}, HostKeys={{ openssh_host_key_algorithms | length }}"
 
-- name: OpenSSH | assert | Validate host keys configuration
-  assert:
+- name: 🧪 OpenSSH | assert | Validate host keys configuration
+  ansible.builtin.assert:
     that:
       - openssh_host_keys is defined
       - openssh_host_keys is sequence
       - openssh_host_keys | length > 0
-    quiet: true
-    fail_msg: "openssh_host_keys must be a non-empty list of key file paths"
+    fail_msg: "❌ openssh_host_keys must be a non-empty list of key file paths"
+    success_msg: "✅ Host keys configuration is valid with {{ openssh_host_keys | length }} keys"
 
-- name: OpenSSH | assert | Validate compression setting
-  assert:
+- name: 🧪 OpenSSH | assert | Validate compression setting
+  ansible.builtin.assert:
     that:
       - openssh_compression is defined
       - openssh_compression is string
       - openssh_compression in ["yes", "no", "delayed"]
-    quiet: true
-    fail_msg: "openssh_compression must be one of: yes, no, delayed"
+    fail_msg: "❌ openssh_compression must be one of: yes, no, delayed"
+    success_msg: "✅ Compression setting is valid: {{ openssh_compression }}"
 
-- name: OpenSSH | assert | Validate login grace time
-  assert:
+- name: 🧪 OpenSSH | assert | Validate login grace time
+  ansible.builtin.assert:
     that:
       - openssh_login_grace_time is defined
       - openssh_login_grace_time is number
       - openssh_login_grace_time >= 0
-    quiet: true
-    fail_msg: "openssh_login_grace_time must be a non-negative number"
+    fail_msg: "❌ openssh_login_grace_time must be a non-negative number"
+    success_msg: "✅ Login grace time is valid: {{ openssh_login_grace_time }} seconds"
 
-- name: OpenSSH | assert | Validate PAM integration setting
-  assert:
+- name: 🧪 OpenSSH | assert | Validate PAM integration setting
+  ansible.builtin.assert:
     that:
       - openssh_use_pam is defined
       - openssh_use_pam is boolean
-    quiet: true
-    fail_msg: "openssh_use_pam must be a boolean value"
+    fail_msg: "❌ openssh_use_pam must be a boolean value"
+    success_msg: "✅ PAM integration setting is valid: {{ openssh_use_pam }}"
 
-- name: OpenSSH | assert | Validate SELinux-related SSH settings
-  assert:
+- name: 🧪 OpenSSH | assert | Validate SELinux-related SSH settings
+  ansible.builtin.assert:
     that:
       - openssh_selinux_chroot_rw_homedirs is defined
       - openssh_selinux_chroot_rw_homedirs is boolean
       - openssh_selinux_sysadm_login is defined
       - openssh_selinux_sysadm_login is boolean
-    quiet: true
-    fail_msg: "SELinux settings for OpenSSH must be boolean values"
+    fail_msg: "❌ SELinux settings for OpenSSH must be boolean values"
+    success_msg: "✅ SELinux settings are valid: ChrootRW={{ openssh_selinux_chroot_rw_homedirs }}, SysAdmLogin={{ openssh_selinux_sysadm_login }}"
 
 # -----------------------------------------------------------------------------
 # 6. Logging Settings
 # -----------------------------------------------------------------------------
-- name: OpenSSH | assert | Validate logging configuration
-  assert:
+- name: 🧪 OpenSSH | assert | Validate logging configuration
+  ansible.builtin.assert:
     that:
       - openssh_log_level is defined
       - openssh_log_level is string
       - openssh_log_level in ["QUIET", "FATAL", "ERROR", "INFO", "VERBOSE", "DEBUG", "DEBUG1", "DEBUG2", "DEBUG3"]
       - openssh_syslog_facility is defined
       - openssh_syslog_facility is string
-    quiet: true
-    fail_msg: "logging settings contain invalid values"
+    fail_msg: "❌ logging settings contain invalid values"
+    success_msg: "✅ Logging configuration is valid: Level={{ openssh_log_level }}, Facility={{ openssh_syslog_facility }}"
 
 # -----------------------------------------------------------------------------
 # 7. SSH Client Settings
 # -----------------------------------------------------------------------------
-- name: OpenSSH | assert | Validate client configuration flag
-  assert:
+- name: 🧪 OpenSSH | assert | Validate client configuration flag
+  ansible.builtin.assert:
     that:
       - openssh_configure_client is defined
       - openssh_configure_client is boolean
-    quiet: true
-    fail_msg: "openssh_configure_client must be a boolean value"
+    fail_msg: "❌ openssh_configure_client must be a boolean value"
+    success_msg: "✅ Client configuration flag is valid: {{ openssh_configure_client }}"
 
-- name: OpenSSH | assert | Validate client configuration path
-  assert:
+- name: 🧪 OpenSSH | assert | Validate client configuration path
+  ansible.builtin.assert:
     that:
       - openssh_ssh_config_path is defined
       - openssh_ssh_config_path is string
-    quiet: true
-    fail_msg: "openssh_ssh_config_path must be a valid file path string"
+    fail_msg: "❌ openssh_ssh_config_path must be a valid file path string"
+    success_msg: "✅ Client configuration path is valid: {{ openssh_ssh_config_path }}"
 
-- name: OpenSSH | assert | Validate client connection and security settings
-  assert:
+- name: 🧪 OpenSSH | assert | Validate client connection and security settings
+  ansible.builtin.assert:
     that:
       - openssh_client_settings is defined
       - openssh_client_settings is mapping
@@ -411,15 +411,15 @@
       - openssh_client_settings.user_known_hosts_file is string
       - openssh_client_settings.send_env is defined
       - openssh_client_settings.send_env is sequence
-    quiet: true
-    fail_msg: "openssh_client_settings is missing required fields or contains invalid values"
+    fail_msg: "❌ openssh_client_settings is missing required fields or contains invalid values"
+    success_msg: "✅ Client connection and security settings are valid: ConnAttempts={{ openssh_client_settings.connection_attempts }}, ConnTimeout={{ openssh_client_settings.connect_timeout }}s, StrictHostKeyCheck={{ openssh_client_settings.strict_host_key_checking }}"
 
 # -----------------------------------------------------------------------------
 # 8. Custom Options Validation
 # -----------------------------------------------------------------------------
-- name: OpenSSH | assert | Validate custom options format
-  assert:
+- name: 🧪 OpenSSH | assert | Validate custom options format
+  ansible.builtin.assert:
     that:
       - openssh_custom_options is undefined or (openssh_custom_options is defined and openssh_custom_options is sequence)
-    quiet: true
-    fail_msg: "openssh_custom_options, if defined, must be a list of strings"
+    fail_msg: "❌ openssh_custom_options, if defined, must be a list of strings"
+    success_msg: "✅ Custom options format is valid: {{ 'Defined with ' + (openssh_custom_options | length | string) + ' options' if openssh_custom_options is defined else 'Undefined (using defaults)' }}"
