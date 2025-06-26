@@ -176,8 +176,8 @@
       - openssh_pubkey_authentication is boolean
     fail_msg: "❌ password and authentication settings must be boolean values"
     success_msg: >-
-      ✅ Password authentication settings are valid: 
-      EmptyPwd={{ openssh_permit_empty_passwords }}, PwdAuth={{ openssh_password_authentication }}, 
+      ✅ Password authentication settings are valid:
+      EmptyPwd={{ openssh_permit_empty_passwords }}, PwdAuth={{ openssh_password_authentication }},
       PubKey={{ openssh_pubkey_authentication }}
 
 - name: 🧪 OpenSSH | assert | Validate host-based authentication settings
@@ -233,8 +233,8 @@
       - openssh_deny_groups is sequence
     fail_msg: "❌ allow/deny lists must be lists (empty lists are allowed)"
     success_msg: >-
-      ✅ User/group access lists are valid: 
-      Allow={{ openssh_allow_users | length + openssh_allow_groups | length }} entries, 
+      ✅ User/group access lists are valid:
+      Allow={{ openssh_allow_users | length + openssh_allow_groups | length }} entries,
       Deny={{ openssh_deny_users | length + openssh_deny_groups | length }} entries
 
 - name: 🧪 OpenSSH | assert | Validate authorized keys file path
@@ -300,8 +300,8 @@
       - openssh_host_key_algorithms | length > 0
     fail_msg: "❌ cipher and algorithm lists must be non-empty lists"
     success_msg: >-
-      ✅ Security algorithms are valid: Ciphers={{ openssh_ciphers | length }}, 
-      MACs={{ openssh_macs | length }}, KEX={{ openssh_kex_algorithms | length }}, 
+      ✅ Security algorithms are valid: Ciphers={{ openssh_ciphers | length }},
+      MACs={{ openssh_macs | length }}, KEX={{ openssh_kex_algorithms | length }},
       HostKeys={{ openssh_host_key_algorithms | length }}
 
 - name: 🧪 OpenSSH | assert | Validate host keys configuration
@@ -422,9 +422,9 @@
       - openssh_client_settings.send_env is sequence
     fail_msg: "❌ openssh_client_settings is missing required fields or contains invalid values"
     success_msg: >-
-      ✅ Client connection and security settings are valid: 
-      ConnAttempts={{ openssh_client_settings.connection_attempts }}, 
-      ConnTimeout={{ openssh_client_settings.connect_timeout }}s, 
+      ✅ Client connection and security settings are valid:
+      ConnAttempts={{ openssh_client_settings.connection_attempts }},
+      ConnTimeout={{ openssh_client_settings.connect_timeout }}s,
       StrictHostKeyCheck={{ openssh_client_settings.strict_host_key_checking }}
 
 # -----------------------------------------------------------------------------
@@ -436,6 +436,6 @@
       - openssh_custom_options is undefined or (openssh_custom_options is defined and openssh_custom_options is sequence)
     fail_msg: "❌ openssh_custom_options, if defined, must be a list of strings"
     success_msg: >-
-      ✅ Custom options format is valid: 
-      {{ 'Defined with ' + (openssh_custom_options | length | string) + ' options' 
+      ✅ Custom options format is valid:
+      {{ 'Defined with ' + (openssh_custom_options | length | string) + ' options'
          if openssh_custom_options is defined else 'Undefined (using defaults)' }}
