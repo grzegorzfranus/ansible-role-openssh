@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed 🔧
 - **CI Badge Reference** - Updated README.md CI status badge to point to renamed `test-and-validation.yml` workflow
 - **Documentation Consistency** - Fixed broken badge link that was still referencing old `ci.yml` workflow file
+- **Ansible Lint Compliance** - Fixed line length warnings in tasks/assert.yml (5 long lines resolved)
+- **YAML Formatting** - Improved multiline success messages for better readability and lint compliance
 
 ### Workflow Improvements 🚀
 - **Galaxy Publishing**: Changed to `📦 Publish to Ansible Galaxy` with descriptive emoji
