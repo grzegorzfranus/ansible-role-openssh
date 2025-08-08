@@ -41,7 +41,7 @@
 
   tasks:
     - name: Verify | Gather OS specific variables
-      include_vars: "{{ lookup('first_found', params) }}"
+      ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
       vars:
         params:
           files:
@@ -83,7 +83,8 @@
     - name: Verify | Show OpenSSH version
       ansible.builtin.debug:
         var: _version_result_.stderr
-      when: _version_result_.rc == 0
+      when: >
+        _version_result_.rc == 0
 
     # -----------------------------------------------------------------------------
     # 3. Service Status Verification
@@ -123,7 +124,10 @@
     - name: Verify | Display SSH configuration file permissions
       ansible.builtin.debug:
         msg: "SSH config permissions: {{ _config_permissions_.stat.mode | default('N/A') }}"
-      when: _config_permissions_ is defined and _config_permissions_.stat is defined and _config_permissions_.stat.exists | default(false)
+      when: >
+        _config_permissions_ is defined and
+        _config_permissions_.stat is defined and
+        _config_permissions_.stat.exists | default(false)
 
     - name: Verify | Verify configuration file ownership
       ansible.builtin.file:

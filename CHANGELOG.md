@@ -5,6 +5,33 @@ All notable changes to this OpenSSH role will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2025-08-07
+
+### Added ✅
+- Linting configuration: role-local `.yamllint` with 200 column limit and ignores for workflows/Molecule
+- Declared required collections in `meta/main.yml`: `ansible.posix`, `community.general`
+- Algorithm/version awareness: dynamic probing of supported algorithms (`ssh -Q`) and auto-selection of effective `Ciphers`, `MACs`, `KexAlgorithms`, and `HostKeyAlgorithms` to prevent `sshd -t` failures on older versions
+
+### Changed 🔄
+- Service management: when `openssh_service_enabled: false`, the role now stops and disables the service; when true, enables and starts it
+- Handler: removed enablement toggle from restart handler to limit handler to restart only
+- SELinux configuration reworked to use idempotent modules (`community.general.sefcontext`, `community.general.seport`) and idempotent restorecon execution instead of shell pipes
+- Removed obsolete `Protocol` directive from `sshd_config.j2`; protocol 2 is implicit in modern OpenSSH
+- Pruned protocol-related defaults and assertions
+- Safer service control: added `openssh_allow_service_stop` (default `false`) and protection from stopping SSH when connected over SSH
+- Compliance toggle: `openssh_gateway_ports` is tri-state (`yes`/`no`/`clientspecified`) and validated accordingly; template renders the exact value
+- Default `MaxStartups` relaxed from `"5:50:10"` to `"10:30:60"`
+
+### Fixed 🔧
+- Multiple long-line messages in assertions converted to folded scalars for YAML linting compliance
+- FQCN normalization across role tasks where applicable
+
+### Security 🛡️
+- Replaced non-idempotent SELinux shell/command operations with proper module usage
+
+### Notes 🗒️
+- Molecule scenario files were not modified as per scope; `ansible-lint` syntax-check failures in Molecule are out-of-scope for this change
+
 ## [1.0.3] - 2025-06-25
 
 ### Changed 🔄

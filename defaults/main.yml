@@ -31,6 +31,9 @@ openssh_role_action: "all"
 # Enable/disable SSH service on boot
 openssh_service_enabled: true
 
+# Safer service control: require explicit opt-in to stop/disable SSH over SSH
+openssh_allow_service_stop: false
+
 # -----------------------------------------------------------------------------
 # 2. SSH Server Settings
 # -----------------------------------------------------------------------------
@@ -46,9 +49,7 @@ openssh_sshd_config_dir: "/etc/ssh/sshd_config.d"
 # However, 22 is kept as default for compatibility - consider changing in production
 openssh_port: 22
 
-# SSH protocol version (only protocol 2 is supported in modern OpenSSH)
-# Protocol 1 is insecure and obsolete
-openssh_protocol: 2
+# Protocol directive removed in modern OpenSSH; protocol 2 is implicit
 
 # Listen addresses
 # Use empty list for all available addresses, or specify IPs
@@ -60,7 +61,8 @@ openssh_tcp_forwarding: false
 openssh_agent_forwarding: false
 openssh_x11_forwarding: false
 openssh_permit_tunnel: false
-openssh_gateway_ports: false
+# GatewayPorts tri-state: 'yes', 'no', or 'clientspecified'
+openssh_gateway_ports: "no"
 
 # Additional forwarding control - disable all forwarding in one directive
 # This is more secure and supplements individual forwarding options above
@@ -82,7 +84,7 @@ openssh_client_alive_count_max: 2
 openssh_max_sessions: 5
 # Control simultaneous unauthenticated connections (start:rate:full)
 # Format: 10:30:100 = max 10 unauthenticated connections; 30% chance of drop after 10; full 100 connections
-openssh_max_startups: "5:50:10"
+openssh_max_startups: "10:30:60"
 
 # -----------------------------------------------------------------------------
 # 3. Authentication Settings

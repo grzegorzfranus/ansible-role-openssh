@@ -22,5 +22,4 @@
   ansible.builtin.systemd:
     name: "{{ openssh_service_name }}"
     state: restarted
-    enabled: "{{ openssh_service_enabled }}"
   listen: "restart openssh"

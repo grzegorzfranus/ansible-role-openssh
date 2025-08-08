@@ -23,7 +23,8 @@
   become: true
   ansible.builtin.fail:
     msg: "Unsupported OS family: {{ ansible_os_family }}. This role supports Debian and RedHat OS families only."
-  when: ansible_os_family not in ["Debian", "RedHat"]
+  when: >
+    ansible_os_family not in ["Debian", "RedHat"]
   tags:
     - always
 
@@ -55,6 +56,17 @@
   tags:
     - always
     - validate
+
+# -----------------------------------------------------------------------------
+# 3.1 Algorithm/Version Awareness (compute effective algorithms)
+# -----------------------------------------------------------------------------
+- name: 🔍 OpenSSH | main | Compute algorithm compatibility
+  ansible.builtin.include_tasks: algorithms.yml
+  when: >
+    openssh_role_action in ['all', 'install', 'config']
+  tags:
+    - setup
+    - configure
 
 # -----------------------------------------------------------------------------
 # 4. System Prerequisites

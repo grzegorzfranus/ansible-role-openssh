@@ -16,9 +16,7 @@
 Port {{ openssh_port }}
 {% endif %}
 
-{% if openssh_protocol is defined %}
-Protocol {{ openssh_protocol }}
-{% endif %}
+{# Protocol directive removed: modern OpenSSH supports only protocol 2 #}
 
 # Listen addresses (empty list means listen on all interfaces)
 {% if openssh_listen_addresses is defined and openssh_listen_addresses|length > 0 %}
@@ -81,20 +79,24 @@ PermitUserEnvironment {{ 'yes' if openssh_permit_user_environment else 'no' }}
 StrictModes {{ 'yes' if openssh_strict_modes else 'no' }}
 
 # Cryptographic settings for secure communications
-{% if openssh_ciphers is defined and openssh_ciphers|length > 0 %}
-Ciphers {{ openssh_ciphers | join(',') }}
+{% set ciphers_to_use = (openssh_effective_ciphers if (openssh_effective_ciphers is defined and openssh_effective_ciphers|length > 0) else openssh_ciphers) %}
+{% if ciphers_to_use is defined and ciphers_to_use|length > 0 %}
+Ciphers {{ ciphers_to_use | join(',') }}
 {% endif %}
 
-{% if openssh_macs is defined and openssh_macs|length > 0 %}
-MACs {{ openssh_macs | join(',') }}
+{% set macs_to_use = (openssh_effective_macs if (openssh_effective_macs is defined and openssh_effective_macs|length > 0) else openssh_macs) %}
+{% if macs_to_use is defined and macs_to_use|length > 0 %}
+MACs {{ macs_to_use | join(',') }}
 {% endif %}
 
-{% if openssh_kex_algorithms is defined and openssh_kex_algorithms|length > 0 %}
-KexAlgorithms {{ openssh_kex_algorithms | join(',') }}
+{% set kex_to_use = (openssh_effective_kex_algorithms if (openssh_effective_kex_algorithms is defined and openssh_effective_kex_algorithms|length > 0) else openssh_kex_algorithms) %}
+{% if kex_to_use is defined and kex_to_use|length > 0 %}
+KexAlgorithms {{ kex_to_use | join(',') }}
 {% endif %}
 
-{% if openssh_host_key_algorithms is defined and openssh_host_key_algorithms|length > 0 %}
-HostKeyAlgorithms {{ openssh_host_key_algorithms | join(',') }}
+{% set hostkeys_to_use = (openssh_effective_host_key_algorithms if (openssh_effective_host_key_algorithms is defined and openssh_effective_host_key_algorithms|length > 0) else openssh_host_key_algorithms) %}
+{% if hostkeys_to_use is defined and hostkeys_to_use|length > 0 %}
+HostKeyAlgorithms {{ hostkeys_to_use | join(',') }}
 {% endif %}
 
 # Authentication integration
@@ -108,7 +110,7 @@ X11Forwarding {{ 'yes' if openssh_x11_forwarding else 'no' }}
 AllowAgentForwarding {{ 'yes' if openssh_agent_forwarding else 'no' }}
 AllowTcpForwarding {{ 'yes' if openssh_tcp_forwarding else 'no' }}
 PermitTunnel {{ 'yes' if openssh_permit_tunnel else 'no' }}
-GatewayPorts {{ 'yes' if openssh_gateway_ports else 'no' }}
+GatewayPorts {{ openssh_gateway_ports }}
 
 # Global forwarding control (supersedes individual settings)
 DisableForwarding {{ 'yes' if openssh_disable_forwarding else 'no' }}

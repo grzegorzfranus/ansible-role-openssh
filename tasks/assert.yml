@@ -25,8 +25,11 @@
       - openssh_role_action is defined
       - openssh_role_action is string
       - openssh_role_action in ["all", "install", "config"]
-    fail_msg: "❌ Invalid role action '{{ openssh_role_action | default('undefined') }}'. Must be one of: all, install, config"
-    success_msg: "✅ Role action parameter is valid: {{ openssh_role_action }}"
+    fail_msg: >-
+      ❌ Invalid role action '{{ openssh_role_action | default('undefined') }}'.
+      Must be one of: all, install, config
+    success_msg: >-
+      ✅ Role action parameter is valid: {{ openssh_role_action }}
 
 - name: 🧪 OpenSSH | assert | Validate service enabled parameter
   ansible.builtin.assert:
@@ -65,14 +68,7 @@
     fail_msg: "❌ Invalid SSH port '{{ openssh_port | default('undefined') }}'. Must be between 1 and 65535"
     success_msg: "✅ SSH port is valid: {{ openssh_port }}"
 
-- name: 🧪 OpenSSH | assert | Validate SSH protocol version
-  ansible.builtin.assert:
-    that:
-      - openssh_protocol is defined
-      - openssh_protocol is number
-      - openssh_protocol == 2
-    fail_msg: "❌ Invalid SSH protocol '{{ openssh_protocol | default('undefined') }}'. Must be 2 (SSH protocol 1 is insecure and obsolete)"
-    success_msg: "✅ SSH protocol version is valid: {{ openssh_protocol }}"
+# Protocol directive is obsolete in modern OpenSSH; variable removed
 
 - name: 🧪 OpenSSH | assert | Validate listen addresses
   ansible.builtin.assert:
@@ -106,9 +102,10 @@
   ansible.builtin.assert:
     that:
       - openssh_gateway_ports is defined
-      - openssh_gateway_ports is boolean
-    fail_msg: "❌ Invalid gateway ports setting '{{ openssh_gateway_ports | default('undefined') }}'. Must be boolean value"
-    success_msg: "✅ Gateway ports setting is valid: {{ openssh_gateway_ports }}"
+      - openssh_gateway_ports is string
+      - openssh_gateway_ports in ["yes", "no", "clientspecified"]
+    fail_msg: "❌ Invalid GatewayPorts '{{ openssh_gateway_ports | default('undefined') }}'. Must be one of: yes, no, clientspecified"
+    success_msg: "✅ GatewayPorts setting is valid: {{ openssh_gateway_ports }}"
 
 - name: 🧪 OpenSSH | assert | Validate disable forwarding flag
   ansible.builtin.assert:
@@ -266,11 +263,15 @@
       - openssh_address_family is string
       - openssh_address_family in ["inet", "inet6", "any"]
       - openssh_gateway_ports is defined
-      - openssh_gateway_ports is boolean
+      - openssh_gateway_ports is string
+      - openssh_gateway_ports in ["yes", "no", "clientspecified"]
       - openssh_accept_env is defined
       - openssh_accept_env is sequence
     fail_msg: "❌ network settings contain invalid values"
-    success_msg: "✅ Network settings are valid: DNS={{ openssh_use_dns }}, Family={{ openssh_address_family }}, AcceptEnv={{ openssh_accept_env | length }} vars"
+    success_msg: >-
+      ✅ Network settings are valid:
+      DNS={{ openssh_use_dns }}, Family={{ openssh_address_family }},
+      AcceptEnv={{ openssh_accept_env | length }} vars
 
 # -----------------------------------------------------------------------------
 # 5. Security Settings
@@ -300,9 +301,9 @@
       - openssh_host_key_algorithms | length > 0
     fail_msg: "❌ cipher and algorithm lists must be non-empty lists"
     success_msg: >-
-      ✅ Security algorithms are valid: Ciphers={{ openssh_ciphers | length }},
-      MACs={{ openssh_macs | length }}, KEX={{ openssh_kex_algorithms | length }},
-      HostKeys={{ openssh_host_key_algorithms | length }}
+      ✅ Security algorithms are valid:
+      Ciphers={{ openssh_ciphers | length }}, MACs={{ openssh_macs | length }},
+      KEX={{ openssh_kex_algorithms | length }}, HostKeys={{ openssh_host_key_algorithms | length }}
 
 - name: 🧪 OpenSSH | assert | Validate host keys configuration
   ansible.builtin.assert:

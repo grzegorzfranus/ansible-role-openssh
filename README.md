@@ -157,6 +157,7 @@ Customize for specific security requirements:
 |----------|-------------|---------|
 | `openssh_role_action` | Define which parts of the role to execute (Options: 'all', 'install', 'config') | `"all"` |
 | `openssh_service_enabled` | Enable/disable SSH service on boot | `true` |
+| `openssh_allow_service_stop` | Allow stopping/disabling SSH when `openssh_service_enabled: false` (safe-guard, ignored when connection is SSH) | `false` |
 
 ### 2. SSH Server Settings
 
@@ -171,7 +172,7 @@ Customize for specific security requirements:
 | `openssh_agent_forwarding` | Allow agent forwarding | `false` |
 | `openssh_x11_forwarding` | Allow X11 forwarding | `false` |
 | `openssh_permit_tunnel` | Permit tunnel devices | `false` |
-| `openssh_gateway_ports` | Allow remote hosts to connect to forwarded ports | `false` |
+| `openssh_gateway_ports` | GatewayPorts value (`yes`/`no`/`clientspecified`) | `"no"` |
 | `openssh_disable_forwarding` | Disable all forwarding features in one directive | `true` |
 | `openssh_print_motd` | Print MOTD banner upon connection | `true` |
 | `openssh_print_last_log` | Print last login information | `true` |
@@ -179,7 +180,7 @@ Customize for specific security requirements:
 | `openssh_client_alive_interval` | Session timeout in seconds | `180` |
 | `openssh_client_alive_count_max` | Max dead client count before session termination | `2` |
 | `openssh_max_sessions` | Maximum allowed sessions | `5` |
-| `openssh_max_startups` | Maximum concurrent unauthenticated connections | `"5:50:10"` |
+| `openssh_max_startups` | Maximum concurrent unauthenticated connections | `"10:30:60"` |
 
 ### 3. Authentication Settings
 
@@ -217,16 +218,18 @@ Customize for specific security requirements:
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `openssh_strict_modes` | Enable strict mode (check file permissions) | `true` |
-| `openssh_ciphers` | List of allowed ciphers | See below |
-| `openssh_macs` | List of allowed MAC algorithms | See below |
-| `openssh_kex_algorithms` | List of allowed key exchange algorithms | See below |
-| `openssh_host_key_algorithms` | List of allowed host key algorithms | See below |
+| `openssh_ciphers` | List of allowed ciphers (auto-filtered against server supported set) | See below |
+| `openssh_macs` | List of allowed MAC algorithms (auto-filtered) | See below |
+| `openssh_kex_algorithms` | List of allowed key exchange algorithms (auto-filtered) | See below |
+| `openssh_host_key_algorithms` | List of allowed host key algorithms (auto-filtered) | See below |
 | `openssh_host_keys` | Paths to host keys | RSA and ED25519 only |
 | `openssh_compression` | Enable/disable compression | `"no"` |
 | `openssh_login_grace_time` | Login grace time in seconds | `60` |
 | `openssh_use_pam` | Use PAM for authentication | `true` |
 | `openssh_selinux_chroot_rw_homedirs` | Restrict SSH to home directories in SELinux | `false` |
 | `openssh_selinux_sysadm_login` | Allow SSH to login as system administrator in SELinux | `false` |
+
+Note: Algorithm lists are kept strict by default, but the role computes and uses effective lists based on what the target OpenSSH supports to avoid configuration validation failures on older versions.
 
 **Default ciphers (strong security focus):**
 ```yaml

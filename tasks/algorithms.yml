@@ -1,0 +1,47 @@
+---
+# =============================================================================
+# Ansible Role: OpenSSH - Algorithm/Version Awareness
+# =============================================================================
+# Detect supported algorithms on target and compute effective lists by
+# intersecting secure defaults with what sshd supports, to avoid validation
+# failures on older OpenSSH versions while keeping strict defaults.
+# =============================================================================
+
+- name: 🔍 OpenSSH | algorithms | Query supported ciphers
+  ansible.builtin.command: ssh -Q cipher
+  register: _sshd_ciphers_
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: 🔍 OpenSSH | algorithms | Query supported MACs
+  ansible.builtin.command: ssh -Q mac
+  register: _sshd_macs_
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: 🔍 OpenSSH | algorithms | Query supported KEX algorithms
+  ansible.builtin.command: ssh -Q kex
+  register: _sshd_kex_
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: 🔍 OpenSSH | algorithms | Query supported hostkey algorithms
+  ansible.builtin.command: ssh -Q key
+  register: _sshd_hostkeys_
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: 🔍 OpenSSH | algorithms | Compute effective algorithm lists
+  ansible.builtin.set_fact:
+    openssh_effective_ciphers: >-
+      {{ openssh_ciphers | select('in', (_sshd_ciphers_.stdout_lines | default([]))) | list }}
+    openssh_effective_macs: >-
+      {{ openssh_macs | select('in', (_sshd_macs_.stdout_lines | default([]))) | list }}
+    openssh_effective_kex_algorithms: >-
+      {{ openssh_kex_algorithms | select('in', (_sshd_kex_.stdout_lines | default([]))) | list }}
+    openssh_effective_host_key_algorithms: >-
+      {{ openssh_host_key_algorithms | select('in', (_sshd_hostkeys_.stdout_lines | default([]))) | list }}

@@ -60,5 +60,16 @@
   become: true
   ansible.builtin.service:
     name: "{{ openssh_service_name }}"
-    enabled: "{{ openssh_service_enabled }}"
+    enabled: true
     state: started
+  when: >
+    openssh_service_enabled | bool
+
+- name: 🛑 OpenSSH | configure | Ensure SSH service is disabled
+  become: true
+  ansible.builtin.service:
+    name: "{{ openssh_service_name }}"
+    enabled: false
+    state: stopped
+  when: >
+    not openssh_service_enabled | bool and openssh_allow_service_stop | bool and (ansible_connection != 'ssh')

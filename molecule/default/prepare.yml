@@ -39,14 +39,16 @@
       ansible.builtin.apt:
         update_cache: true
         cache_valid_time: 3600
-      when: ansible_os_family is defined and ansible_os_family == "Debian"
+      when: >
+        ansible_os_family is defined and ansible_os_family == "Debian"
       ignore_errors: true
       changed_when: false
 
     - name: Prepare | Update package cache (RedHat)
       ansible.builtin.dnf:
         update_cache: true
-      when: ansible_os_family is defined and ansible_os_family == "RedHat"
+      when: >
+        ansible_os_family is defined and ansible_os_family == "RedHat"
       ignore_errors: true
       changed_when: false
 
@@ -57,7 +59,8 @@
           - openssh-server
           - openssh-client
         state: present
-      when: ansible_os_family is defined and ansible_os_family == "Debian"
+      when: >
+        ansible_os_family is defined and ansible_os_family == "Debian"
       ignore_errors: true
 
     - name: Prepare | Install OpenSSH packages (RedHat)
@@ -66,7 +69,8 @@
           - openssh-server
           - openssh-clients
         state: present
-      when: ansible_os_family is defined and ansible_os_family == "RedHat"
+      when: >
+        ansible_os_family is defined and ansible_os_family == "RedHat"
       ignore_errors: true
 
     # Generate SSH host keys to avoid "no hostkeys available" error during testing
@@ -92,13 +96,15 @@
     - name: Prepare | Generate RSA host key if it doesn't exist
       ansible.builtin.command:
         cmd: ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N ''
-      when: not rsa_key_file.stat.exists | default(false)
+      when: >
+        not rsa_key_file.stat.exists | default(false)
       ignore_errors: true
 
     - name: Prepare | Generate ED25519 host key if it doesn't exist
       ansible.builtin.command:
         cmd: ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N ''
-      when: not ed25519_key_file.stat.exists | default(false)
+      when: >
+        not ed25519_key_file.stat.exists | default(false)
       ignore_errors: true
 
     # Fallback for key creation if ssh-keygen fails
@@ -149,7 +155,8 @@
         mode: '0600'
         owner: root
         group: root
-      when: not rsa_key_check.stat.exists | default(false)
+      when: >
+        not rsa_key_check.stat.exists | default(false)
       ignore_errors: true
 
     - name: Prepare | Create placeholder RSA key public file if still missing
@@ -164,7 +171,8 @@
         mode: '0644'
         owner: root
         group: root
-      when: not rsa_key_check.stat.exists | default(false)
+      when: >
+        not rsa_key_check.stat.exists | default(false)
       ignore_errors: true
 
     - name: Prepare | Create placeholder ED25519 key file if still missing
@@ -181,7 +189,8 @@
         mode: '0600'
         owner: root
         group: root
-      when: not ed25519_key_check.stat.exists | default(false)
+      when: >
+        not ed25519_key_check.stat.exists | default(false)
       ignore_errors: true
 
     - name: Prepare | Create placeholder ED25519 key public file if still missing
@@ -193,7 +202,8 @@
         mode: '0644'
         owner: root
         group: root
-      when: not ed25519_key_check.stat.exists | default(false)
+      when: >
+        not ed25519_key_check.stat.exists | default(false)
       ignore_errors: true
 
     - name: Prepare | Set correct permissions on host keys
@@ -205,7 +215,8 @@
       with_items:
         - /etc/ssh/ssh_host_rsa_key
         - /etc/ssh/ssh_host_ed25519_key
-      when: item is file
+      when: >
+        item is file
       ignore_errors: true
 
     # Create SSH privilege separation directory
@@ -242,5 +253,6 @@
       with_items:
         - /etc/systemd/system
         - /lib/systemd/system
-      when: ansible_service_mgr is defined and ansible_service_mgr == 'systemd'
+      when: >
+        ansible_service_mgr is defined and ansible_service_mgr == 'systemd'
       ignore_errors: true
