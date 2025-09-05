@@ -166,7 +166,9 @@ Customize for specific security requirements:
 | `openssh_sshd_config_path` | SSH daemon configuration file path | `"/etc/ssh/sshd_config"` |
 | `openssh_sshd_config_dir` | SSH daemon configuration directory for drop-in files | `"/etc/ssh/sshd_config.d"` |
 | `openssh_port` | SSH daemon port | `22` |
-| `openssh_protocol` | SSH protocol version | `2` |
+| `openssh_sshd_validate_command` | Command used to validate sshd config (string with %s path placeholder) | `'/usr/sbin/sshd -t -f %s'` |
+| `openssh_service_name` | SSH service name (OS-specific) | Debian: `ssh`, RedHat: `sshd` |
+| `openssh_packages` | Package list (OS-specific) | Debian: `[openssh-server, openssh-client]`, RedHat: `[openssh-server, openssh-clients]` |
 | `openssh_listen_addresses` | List of IP addresses to listen on (empty for all) | `[]` |
 | `openssh_tcp_forwarding` | Allow TCP forwarding | `false` |
 | `openssh_agent_forwarding` | Allow agent forwarding | `false` |
@@ -428,10 +430,8 @@ ansible-role-openssh/
 
 - `always` - Tasks that always run (variable loading and validation)
 - `setup` - Setup tasks including OS-specific variables, requirements, installation, and configuration
-- `prerequisites` - System requirement verification and preparation tasks
+- `requirements` - System requirement verification and preparation tasks
 - `install` - OpenSSH package installation tasks
-- `selinux` - SELinux configuration and policy management tasks
-- `security` - Security-related configuration and hardening tasks
 - `configure` - SSH server and client configuration tasks
 - `validate` - Variable validation and system compatibility checks
 

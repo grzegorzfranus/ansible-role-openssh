@@ -14,7 +14,7 @@
 # -----------------------------------------------------------------------------
 # 1. Server Configuration
 # -----------------------------------------------------------------------------
-- name: 🌐 OpenSSH | configure | Deploy SSH server configuration
+- name: OpenSSH | configure | Deploy SSH server configuration
   become: true
   ansible.builtin.template:
     src: "ssh/sshd_config.j2"
@@ -29,7 +29,7 @@
 # -----------------------------------------------------------------------------
 # 2. Client Configuration
 # -----------------------------------------------------------------------------
-- name: 🌐 OpenSSH | configure | Deploy SSH client configuration
+- name: OpenSSH | configure | Deploy SSH client configuration
   become: true
   ansible.builtin.template:
     src: "ssh/ssh_config.j2"
@@ -44,7 +44,7 @@
 # -----------------------------------------------------------------------------
 # 3. Banner Setup
 # -----------------------------------------------------------------------------
-- name: 📝 OpenSSH | configure | Create banner file
+- name: OpenSSH | configure | Create banner file
   become: true
   ansible.builtin.template:
     src: "ssh/banner.j2"
@@ -56,7 +56,7 @@
 # -----------------------------------------------------------------------------
 # 4. Service Status Management
 # -----------------------------------------------------------------------------
-- name: 🚀 OpenSSH | configure | Ensure SSH service is enabled
+- name: OpenSSH | configure | Ensure SSH service is enabled
   become: true
   ansible.builtin.service:
     name: "{{ openssh_service_name }}"
@@ -65,7 +65,7 @@
   when: >
     openssh_service_enabled | bool
 
-- name: 🛑 OpenSSH | configure | Ensure SSH service is disabled
+- name: OpenSSH | configure | Ensure SSH service is disabled
   become: true
   ansible.builtin.service:
     name: "{{ openssh_service_name }}"

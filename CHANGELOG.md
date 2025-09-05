@@ -5,6 +5,33 @@ All notable changes to this OpenSSH role will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2025-09-05
+
+### Added ✅
+- Variable assertions coverage extended in `tasks/assert.yml`:
+  - `openssh_allow_service_stop` (boolean)
+  - `openssh_service_name` (non-empty string)
+  - `openssh_packages` (non-empty list)
+  - `openssh_sshd_validate_command` (string)
+- Flow documentation block added to `tasks/algorithms.yml` for clarity.
+- README updated to document OS-specific variables and validation command.
+
+### Changed 🔄
+- Standardized all task/handler names to "OpenSSH | section | description" and removed emojis from names.
+- Aligned tags with the allowed set: replaced `prerequisites` with `requirements`; removed non-standard tags from includes in `tasks/main.yml`.
+- Normalized handler name in `handlers/main.yml` (emoji removed).
+
+### Fixed 🔧
+- README: removed non-existent variable `openssh_protocol`.
+- README: updated Tags section to match allowed tags.
+
+### Quality Improvements 📈
+- Lint clean on all edited files.
+- Documentation synchronized with defaults and assertions (variables table now consistent).
+
+### Notes 🗒️
+- Role naming, tagging, and validation now align with repository Ansible rules.
+
 ## [1.0.4] - 2025-08-07
 
 ### Added ✅

@@ -59,3 +59,6 @@ venv.bak/
 
 # Ignore cache
 .cache
+
+# Ansible
+.ansible/

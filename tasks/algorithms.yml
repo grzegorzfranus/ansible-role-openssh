@@ -5,37 +5,42 @@
 # Detect supported algorithms on target and compute effective lists by
 # intersecting secure defaults with what sshd supports, to avoid validation
 # failures on older OpenSSH versions while keeping strict defaults.
+#
+# Flow:
+# 1. Query supported algorithms from ssh client (cipher, mac, kex, hostkey)
+# 2. Compute effective lists by intersecting with secure defaults
+# 3. Expose computed facts for use in templates/configuration
 # =============================================================================
 
-- name: 🔍 OpenSSH | algorithms | Query supported ciphers
+- name: OpenSSH | algorithms | Query supported ciphers
   ansible.builtin.command: ssh -Q cipher
   register: _sshd_ciphers_
   changed_when: false
   failed_when: false
   check_mode: false
 
-- name: 🔍 OpenSSH | algorithms | Query supported MACs
+- name: OpenSSH | algorithms | Query supported MACs
   ansible.builtin.command: ssh -Q mac
   register: _sshd_macs_
   changed_when: false
   failed_when: false
   check_mode: false
 
-- name: 🔍 OpenSSH | algorithms | Query supported KEX algorithms
+- name: OpenSSH | algorithms | Query supported KEX algorithms
   ansible.builtin.command: ssh -Q kex
   register: _sshd_kex_
   changed_when: false
   failed_when: false
   check_mode: false
 
-- name: 🔍 OpenSSH | algorithms | Query supported hostkey algorithms
+- name: OpenSSH | algorithms | Query supported hostkey algorithms
   ansible.builtin.command: ssh -Q key
   register: _sshd_hostkeys_
   changed_when: false
   failed_when: false
   check_mode: false
 
-- name: 🔍 OpenSSH | algorithms | Compute effective algorithm lists
+- name: OpenSSH | algorithms | Compute effective algorithm lists
   ansible.builtin.set_fact:
     openssh_effective_ciphers: >-
       {{ openssh_ciphers | select('in', (_sshd_ciphers_.stdout_lines | default([]))) | list }}
