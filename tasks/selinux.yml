@@ -56,7 +56,7 @@
     state: present
   when: >
     _selinux_mode_ | default(false) and
-    (ansible_os_family | lower == 'redhat')
+    (ansible_facts['os_family'] | lower == 'redhat')
 
 - name: "OpenSSH | selinux | Install SELinux management packages (Debian)"
   become: true
@@ -67,7 +67,7 @@
     state: present
   when: >
     _selinux_mode_ | default(false) and
-    (ansible_os_family | lower == 'debian')
+    (ansible_facts['os_family'] | lower == 'debian')
 
 # -----------------------------------------------------------------------------
 # 3. Configure SELinux Policies for OpenSSH

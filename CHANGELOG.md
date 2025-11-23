@@ -5,6 +5,17 @@ All notable changes to this OpenSSH role will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2025-11-23
+
+### Fixed 🔧
+- Ansible 2.20 compatibility: replaced deprecated `ansible_os_family` with `ansible_facts['os_family']` syntax
+- Resolved deprecation warning: "INJECT_FACTS_AS_VARS default to `True` is deprecated"
+- Updated fact references in `tasks/main.yml` and `tasks/selinux.yml` to use modern `ansible_facts` dictionary
+
+### Compatibility 🔄
+- Fully compatible with Ansible 2.15 through 2.20 and beyond
+- Prepared for Ansible 2.24 where top-level fact injection will be removed
+
 ## [1.0.5] - 2025-09-05
 
 ### Added ✅
