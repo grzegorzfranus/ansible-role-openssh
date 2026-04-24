@@ -1,29 +1,6 @@
-# =============================================================================
-# Ansible Role: OpenSSH - Molecule Verification Playbook
-# =============================================================================
-# This playbook verifies the installation and configuration of OpenSSH.
-# It performs comprehensive checks of:
-# - Package installation and versioning
-# - Service status and configuration
-# - Configuration files and permissions
-# - SSH daemon settings
-# - Port availability and connectivity
-# - Security settings validation
-#
-# Flow:
-# 1. Load variables and gather facts
-# 2. Verify package installation
-# 3. Check service status
-# 4. Validate configuration files
-# 5. Verify SSH daemon configuration
-# 6. Test connectivity
-# 7. Validate security settings
-# =============================================================================
-
 ---
-# -----------------------------------------------------------------------------
-# 1. Environment Setup
-# -----------------------------------------------------------------------------
+# Molecule verification playbook — validates OpenSSH installation and configuration.
+
 - name: molecule | Verify Role
   hosts: all
   gather_facts: true
@@ -55,9 +32,7 @@
           paths:
             - "../../vars"
 
-    # -----------------------------------------------------------------------------
     # 2. Package Verification
-    # -----------------------------------------------------------------------------
     - name: Verify | Check if openssh-server package is installed
       ansible.builtin.package:
         name: "{{ openssh_server_package }}"
@@ -86,9 +61,7 @@
       when: >
         _version_result_.rc == 0
 
-    # -----------------------------------------------------------------------------
     # 3. Service Status Verification
-    # -----------------------------------------------------------------------------
     - name: Verify | Check if sshd service is running
       ansible.builtin.service:
         name: "{{ openssh_service_name }}"
@@ -106,9 +79,7 @@
       ignore_errors: true
       check_mode: true
 
-    # -----------------------------------------------------------------------------
     # 4. Configuration Verification
-    # -----------------------------------------------------------------------------
     - name: Verify | Check if SSH configuration file exists
       ansible.builtin.stat:
         path: "{{ openssh_sshd_config_path }}"
@@ -139,9 +110,7 @@
       register: _config_ownership_
       ignore_errors: true
 
-    # -----------------------------------------------------------------------------
     # 5. SSH Configuration Settings Verification
-    # -----------------------------------------------------------------------------
     - name: Verify | Check SSH daemon configuration
       ansible.builtin.command:
         cmd: "grep -i '{{ item.key }}' {{ openssh_sshd_config_path }}"
@@ -155,9 +124,7 @@
       changed_when: false
       ignore_errors: true
 
-    # -----------------------------------------------------------------------------
     # 6. Port Verification
-    # -----------------------------------------------------------------------------
     - name: Verify | Check if SSH port is listening
       ansible.builtin.command:
         cmd: "ss -tunlp | grep '{{ openssh_port }}'"
@@ -169,9 +136,7 @@
       ansible.builtin.debug:
         msg: "SSH port {{ openssh_port }} is {{ _port_check_.rc == 0 | ternary('open', 'closed') }}"
 
-    # -----------------------------------------------------------------------------
     # 7. Test Results Summary
-    # -----------------------------------------------------------------------------
     - name: Verify | Summarize test results
       ansible.builtin.debug:
         msg: |

@@ -1,22 +1,6 @@
-# =============================================================================
-# Ansible Role: OpenSSH - Molecule Convergence Playbook
-# =============================================================================
-# This playbook executes the main role functionality in the test environment.
-# It performs the following steps:
-# - Updates package repositories
-# - Ensures system readiness
-# - Executes the OpenSSH role with test configuration
-#
-# Flow:
-# 1. Update package cache
-# 2. Wait for system initialization
-# 3. Apply OpenSSH role with test variables
-# =============================================================================
-
 ---
-# -----------------------------------------------------------------------------
-# 1. Pre-Tasks Setup
-# -----------------------------------------------------------------------------
+# Molecule convergence playbook — executes the OpenSSH role in the test environment.
+
 - name: molecule | Converge
   hosts: all
 
@@ -36,9 +20,7 @@
       changed_when: false
       failed_when: systemctl_status.rc > 1
 
-# -----------------------------------------------------------------------------
 # 2. Role Execution with Test Variables
-# -----------------------------------------------------------------------------
   vars:
     # Test configuration for OpenSSH role
     openssh_service_enabled: true

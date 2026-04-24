@@ -1,21 +1,6 @@
-# =============================================================================
-# Ansible Role: OpenSSH - Molecule Preparation Playbook
-# =============================================================================
-# This playbook prepares the test environment for Molecule testing.
-# It performs necessary system preparations before role execution:
-# - Fixes file permissions
-# - Validates system requirements
-# - Sets up required dependencies for SSH testing
-#
-# Flow:
-# 1. Fix system file permissions
-# 2. Validate system state
-# =============================================================================
-
 ---
-# -----------------------------------------------------------------------------
-# 1. System File Permissions
-# -----------------------------------------------------------------------------
+# Molecule preparation playbook — sets up the test environment before role execution.
+
 - name: molecule | Prepare
   hosts: all
   gather_facts: true
