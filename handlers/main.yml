@@ -1,25 +1,11 @@
 ---
-# =============================================================================
-# Ansible Role: OpenSSH - Handlers
-# =============================================================================
-# Handlers are used to perform service actions in response to configuration changes.
-# This handler manages OpenSSH service state when notified by tasks that modify
-# system configuration.
-#
-# Variables:
-#   openssh_service_name - Name of the OpenSSH service to manage (ssh/sshd)
-#   openssh_service_enabled - Boolean flag to control service enablement
-#
-# Handler Triggers:
-#   restart openssh - Triggered when OpenSSH configuration changes
-# =============================================================================
+# Handlers are triggered by 'notify: restart openssh' in tasks.
+# The service_enabled guard prevents restarting a deliberately disabled service.
 
-# -----------------------------------------------------------------------------
-# 1. OpenSSH Service Restart
-# -----------------------------------------------------------------------------
 - name: OpenSSH | handlers | Restart OpenSSH service
   become: true
-  ansible.builtin.systemd:
+  ansible.builtin.service:
     name: "{{ openssh_service_name }}"
     state: restarted
+  when: openssh_service_enabled | bool
   listen: "restart openssh"

@@ -1,51 +1,30 @@
 ---
-# =============================================================================
-# Ansible Role: OpenSSH - SELinux Configuration Tasks
-# =============================================================================
-# These tasks configure SELinux settings for OpenSSH to function properly
-# while maintaining high security. They only run if SELinux is enabled
-# on the target system.
-#
-# Flow:
-# 1. Check SELinux status on the target system
-# 2. Install SELinux management tools if needed
-# 3. Configure SELinux policies for OpenSSH:
-#    a. Configure SELinux context for SSH directories
-#    b. Set security-focused booleans for OpenSSH
-#    c. Configure non-standard SSH port if needed
-# =============================================================================
+# SELinux configuration — applies SELinux policies for OpenSSH if SELinux is active.
 
-# Set the default SELinux mode to false (assume it's disabled)
 - name: "OpenSSH | selinux | Set default SELinux mode to disabled"
   ansible.builtin.set_fact:
-    _selinux_mode_: false
+    __openssh_selinux_mode: false
 
-# -----------------------------------------------------------------------------
-# 1. Check SELinux Status
-# -----------------------------------------------------------------------------
 - name: "OpenSSH | selinux | Get getenforce binary of SELinux"
   ansible.builtin.stat:
     path: /usr/sbin/getenforce
-  register: _getenforce_bin_
+  register: __openssh_getenforce_bin
 
 - name: "OpenSSH | selinux | Collect getenforce output of SELinux"
   ansible.builtin.command: /usr/sbin/getenforce
-  register: _sestatus_
+  register: __openssh_sestatus
   when: >
-    _getenforce_bin_.stat.exists
+    __openssh_getenforce_bin.stat.exists
   changed_when: false
   check_mode: false
 
-- name: "OpenSSH | selinux | Set _selinux_mode_ fact if getenforce returns Enforcing or Permissive mode"
+- name: "OpenSSH | selinux | Set SELinux mode fact if Enforcing or Permissive"
   ansible.builtin.set_fact:
-    _selinux_mode_: "{{ true }}"
+    __openssh_selinux_mode: true
   when: >
-    _getenforce_bin_.stat.exists and
-    ("Enforcing" in _sestatus_.stdout or "Permissive" in _sestatus_.stdout)
+    __openssh_getenforce_bin.stat.exists and
+    ("Enforcing" in __openssh_sestatus.stdout or "Permissive" in __openssh_sestatus.stdout)
 
-# -----------------------------------------------------------------------------
-# 2. Install SELinux Management Tools
-# -----------------------------------------------------------------------------
 - name: "OpenSSH | selinux | Install SELinux management packages (RedHat)"
   become: true
   ansible.builtin.package:
@@ -55,7 +34,7 @@
       - selinux-policy-targeted
     state: present
   when: >
-    _selinux_mode_ | default(false) and
+    __openssh_selinux_mode | default(false) and
     (ansible_facts['os_family'] | lower == 'redhat')
 
 - name: "OpenSSH | selinux | Install SELinux management packages (Debian)"
@@ -66,18 +45,14 @@
       - policycoreutils-python-utils
     state: present
   when: >
-    _selinux_mode_ | default(false) and
+    __openssh_selinux_mode | default(false) and
     (ansible_facts['os_family'] | lower == 'debian')
 
-# -----------------------------------------------------------------------------
-# 3. Configure SELinux Policies for OpenSSH
-# -----------------------------------------------------------------------------
 - name: "OpenSSH | selinux | Apply SELinux policies for OpenSSH"
   when: >
-    _selinux_mode_ | default(false)
+    __openssh_selinux_mode | default(false)
   block:
 
-    # Ensure correct SELinux file contexts for SSH configuration
     - name: "OpenSSH | selinux | Ensure SELinux file context for SSH configuration"
       become: true
       community.general.sefcontext:
@@ -89,33 +64,34 @@
       become: true
       ansible.builtin.command:
         cmd: restorecon -irn /etc/ssh
-      register: _restorecon_check_
-      changed_when: _restorecon_check_.stdout is defined and _restorecon_check_.stdout | length > 0
+      register: __openssh_restorecon_check
+      changed_when: __openssh_restorecon_check.stdout is defined and __openssh_restorecon_check.stdout | length > 0
       check_mode: false
 
+    # Only run restorecon if dry-run detected pending changes
     - name: "OpenSSH | selinux | Restore SELinux contexts for SSH configuration"
       become: true
       ansible.builtin.command:
         cmd: restorecon -irv /etc/ssh
+      register: __openssh_restorecon_result
       when: >
-        _restorecon_check_.stdout is defined and
-        _restorecon_check_.stdout | length > 0
-      changed_when: true
+        __openssh_restorecon_check.stdout is defined and
+        __openssh_restorecon_check.stdout | length > 0
+      changed_when: >
+        __openssh_restorecon_result.stdout is defined and
+        __openssh_restorecon_result.stdout | length > 0
 
-    # Set security-focused SELinux booleans
+    # SELinux booleans — values driven by defaults variables
     - name: "OpenSSH | selinux | Set security-focused SELinux booleans for OpenSSH"
       become: true
       ansible.posix.seboolean:
         name: "{{ item.name }}"
         state: "{{ 'yes' if item.value else 'no' }}"
         persistent: true
-      with_items:
-        # Disable ability to run arbitrary code - security best practice
-        - { name: "ssh_chroot_rw_homedirs", value: false }
-        # Allow ssh to login as system administrator - enable only if needed
-        - { name: "ssh_sysadm_login", value: false }
+      loop:
+        - { name: "ssh_chroot_rw_homedirs", value: "{{ openssh_selinux_chroot_rw_homedirs }}" }
+        - { name: "ssh_sysadm_login", value: "{{ openssh_selinux_sysadm_login }}" }
 
-    # Handle non-standard SSH port
     - name: "OpenSSH | selinux | Allow non-standard SSH TCP port in SELinux"
       become: true
       community.general.seport:

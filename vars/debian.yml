@@ -1,25 +1,10 @@
 ---
-# =============================================================================
-# Ansible Role: OpenSSH - Debian-Specific Variables
-# =============================================================================
-# This file defines variables specific to Debian-based distributions.
-# These values override or supplement the common variables defined in main.yml.
-#
-# Sections:
-#   1. Package Settings
-#   2. Service Settings
-# =============================================================================
+# Debian-specific variables.
 
-# -----------------------------------------------------------------------------
-# 1. Package Settings
-# -----------------------------------------------------------------------------
-# Package names for Debian-based systems
+# Package names
 openssh_packages:
   - openssh-server
   - openssh-client
 
-# -----------------------------------------------------------------------------
-# 2. Service Settings
-# -----------------------------------------------------------------------------
-# Service name on Debian-based systems
+# Service name
 openssh_service_name: ssh

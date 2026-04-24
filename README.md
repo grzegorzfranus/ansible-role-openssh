@@ -35,11 +35,54 @@ SSH Clients ←→ OpenSSH Server ←→ Target Servers
    (remote)      (this host)        (backend)
 ```
 
+### Role Outcome
+
+After successful execution, this role guarantees:
+
+- OpenSSH server installed and running with hardened configuration
+- SSH client configured with secure defaults (when `openssh_configure_client: true`)
+- Security banner deployed to `/etc/issue.net`
+- SELinux policies configured (when SELinux is active on RedHat systems)
+- All cryptographic algorithms validated against target system capabilities
+
+## 📋 Role Properties
+
+| Property | Value |
+|----------|-------|
+| **Idempotent** | Yes — re-running with same parameters produces no changes |
+| **Atomic** | No — partial execution may leave partial configuration |
+| **Roll-back** | Partial — configuration files are backed up before changes (`backup: true`) |
+| **Check Mode** | Supported — role runs in check mode without making changes |
+
+### Managed Configuration Files
+
+> **⚠️ Warning:** The following files are **fully replaced** (not modified) by this role. Manual changes will be overwritten on next run.
+
+| File | Managed When |
+|------|--------------|
+| `/etc/ssh/sshd_config` | Always |
+| `/etc/ssh/ssh_config` | When `openssh_configure_client: true` |
+| `/etc/issue.net` | Always (banner) |
+
 ## 📋 Requirements
 
 - **Ansible**: 2.15 or higher
 - **Network**: Secure network connectivity for SSH access
 - **Privileges**: sudo/root access on target hosts
+
+### Collection Dependencies
+
+This role requires the following Ansible collections:
+
+| Collection | Purpose |
+|------------|---------|
+| `ansible.posix` | SELinux boolean management (`seboolean`) |
+| `community.general` | SELinux context/port management (`sefcontext`, `seport`) |
+
+Install with:
+```bash
+ansible-galaxy collection install ansible.posix community.general
+```
 
 ### Supported operating systems
 List of officially supported operating systems:
@@ -50,7 +93,7 @@ List of officially supported operating systems:
 | Debian | 12 (Bookworm) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 11 (Bullseye) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Rocky Linux | 9 | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
-| Oracle Linux | 9 | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
+| Oracle Linux | 9 | ![~](https://img.shields.io/badge/~-community--tested-yellow.svg) |
 
 ### Ansible version
 
@@ -195,7 +238,7 @@ Customize for specific security requirements:
 | `openssh_host_based_auth` | Enable host-based authentication | `false` |
 | `openssh_ignore_rhosts` | Disable .rhosts files for security | `true` |
 | `openssh_permit_user_environment` | Disable user environment file processing | `false` |
-| `openssh_challenge_response_auth` | Enable challenge-response authentication | `false` |
+| `openssh_kbd_interactive_auth` | Enable keyboard-interactive authentication (replaces deprecated `ChallengeResponseAuthentication`, OpenSSH 8.7+) | `false` |
 | `openssh_kerberos_auth` | Enable Kerberos authentication | `false` |
 | `openssh_kerberos_ticket_cleanup` | Clean up Kerberos tickets on connection close | `true` |
 | `openssh_gssapi_auth` | Enable GSSAPI authentication | `false` |

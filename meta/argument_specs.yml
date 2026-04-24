@@ -1,0 +1,407 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure OpenSSH server and client with security hardening.
+    description:
+      - Installs OpenSSH packages, deploys hardened sshd_config and ssh_config,
+        manages SELinux policies, and ensures service state.
+      - Supports Debian and RedHat OS families.
+    author: Grzegorz Franus
+
+    options:
+      # --- General Settings ---
+      openssh_role_action:
+        description: Which parts of the role to execute.
+        type: str
+        default: "all"
+        choices: ["all", "install", "config"]
+
+      openssh_service_enabled:
+        description: Enable and start the SSH service on boot.
+        type: bool
+        default: true
+
+      openssh_allow_service_stop:
+        description: >-
+          Allow the role to stop/disable the SSH service.
+          Requires explicit opt-in to prevent accidental lockout.
+        type: bool
+        default: false
+
+      # --- SSH Server Settings ---
+      openssh_sshd_config_path:
+        description: Path to the SSH daemon configuration file.
+        type: str
+        default: "/etc/ssh/sshd_config"
+
+      openssh_sshd_config_dir:
+        description: Path to the SSH daemon drop-in configuration directory.
+        type: str
+        default: "/etc/ssh/sshd_config.d"
+
+      openssh_sshd_validate_command:
+        description: Command used to validate sshd_config before applying. Must contain %s placeholder.
+        type: str
+        default: "/usr/sbin/sshd -t -f %s"
+
+      openssh_port:
+        description: SSH daemon listen port.
+        type: int
+        default: 22
+
+      openssh_listen_addresses:
+        description: List of IP addresses for SSH daemon to listen on. Empty list means all interfaces.
+        type: list
+        elements: str
+        default: []
+
+      openssh_tcp_forwarding:
+        description: Allow TCP forwarding.
+        type: bool
+        default: false
+
+      openssh_agent_forwarding:
+        description: Allow SSH agent forwarding.
+        type: bool
+        default: false
+
+      openssh_x11_forwarding:
+        description: Allow X11 forwarding.
+        type: bool
+        default: false
+
+      openssh_permit_tunnel:
+        description: Allow tunnel device forwarding.
+        type: bool
+        default: false
+
+      openssh_gateway_ports:
+        description: Allow remote hosts to connect to local forwarded ports.
+        type: str
+        default: "no"
+        choices: ["yes", "no", "clientspecified"]
+
+      openssh_disable_forwarding:
+        description: Disable all forwarding in one directive (supersedes individual settings).
+        type: bool
+        default: true
+
+      openssh_print_motd:
+        description: Print the message of the day on login.
+        type: bool
+        default: true
+
+      openssh_print_last_log:
+        description: Print last login information on login.
+        type: bool
+        default: true
+
+      openssh_banner_path:
+        description: Path to the pre-authentication banner file.
+        type: str
+        default: "/etc/issue.net"
+
+      openssh_client_alive_interval:
+        description: Timeout interval in seconds for idle sessions.
+        type: int
+        default: 180
+
+      openssh_client_alive_count_max:
+        description: Maximum number of keepalive messages before disconnecting.
+        type: int
+        default: 2
+
+      openssh_max_sessions:
+        description: Maximum number of open sessions per connection.
+        type: int
+        default: 5
+
+      openssh_max_startups:
+        description: >-
+          Maximum concurrent unauthenticated connections.
+          Format start:rate:full.
+        type: str
+        default: "10:30:60"
+
+      # --- Authentication Settings ---
+      openssh_permit_root_login:
+        description: Root login policy.
+        type: str
+        default: "no"
+        choices: ["yes", "no", "without-password", "prohibit-password"]
+
+      openssh_permit_empty_passwords:
+        description: Allow login with empty passwords.
+        type: bool
+        default: false
+
+      openssh_password_authentication:
+        description: Allow password authentication.
+        type: bool
+        default: false
+
+      openssh_pubkey_authentication:
+        description: Allow public key authentication.
+        type: bool
+        default: true
+
+      openssh_host_based_auth:
+        description: Allow host-based authentication.
+        type: bool
+        default: false
+
+      openssh_ignore_rhosts:
+        description: Ignore .rhosts and .shosts files.
+        type: bool
+        default: true
+
+      openssh_kbd_interactive_auth:
+        description: >-
+          Allow keyboard-interactive authentication.
+          Replaces deprecated ChallengeResponseAuthentication (OpenSSH 8.7+).
+        type: bool
+        default: false
+
+      openssh_kerberos_auth:
+        description: Allow Kerberos authentication.
+        type: bool
+        default: false
+
+      openssh_kerberos_ticket_cleanup:
+        description: Destroy Kerberos ticket on logout.
+        type: bool
+        default: true
+
+      openssh_gssapi_auth:
+        description: Allow GSSAPI authentication.
+        type: bool
+        default: false
+
+      openssh_gssapi_cleanup_credentials:
+        description: Destroy GSSAPI credentials on logout.
+        type: bool
+        default: true
+
+      openssh_permit_user_environment:
+        description: Allow processing of ~/.ssh/environment.
+        type: bool
+        default: false
+
+      openssh_allow_users:
+        description: List of users allowed to log in. Empty means no restriction.
+        type: list
+        elements: str
+        default: []
+
+      openssh_allow_groups:
+        description: List of groups allowed to log in. Empty means no restriction.
+        type: list
+        elements: str
+        default: []
+
+      openssh_deny_users:
+        description: List of users denied from logging in.
+        type: list
+        elements: str
+        default: []
+
+      openssh_deny_groups:
+        description: List of groups denied from logging in.
+        type: list
+        elements: str
+        default: []
+
+      openssh_authorized_keys_file:
+        description: Path to authorized keys file relative to user home.
+        type: str
+        default: ".ssh/authorized_keys"
+
+      openssh_max_auth_tries:
+        description: Maximum authentication attempts per connection.
+        type: int
+        default: 3
+
+      # --- Network Settings ---
+      openssh_use_dns:
+        description: Perform DNS lookups for connecting clients.
+        type: bool
+        default: false
+
+      openssh_address_family:
+        description: IP address family to use.
+        type: str
+        default: "any"
+        choices: ["inet", "inet6", "any"]
+
+      openssh_accept_env:
+        description: List of environment variable patterns accepted from client.
+        type: list
+        elements: str
+        default: ["LANG", "LC_*"]
+
+      # --- Security Settings ---
+      openssh_strict_modes:
+        description: Check file permissions and ownership before accepting login.
+        type: bool
+        default: true
+
+      openssh_ciphers:
+        description: Allowed cipher algorithms (ordered by preference).
+        type: list
+        elements: str
+        default:
+          - "chacha20-poly1305@openssh.com"
+          - "aes256-gcm@openssh.com"
+          - "aes128-gcm@openssh.com"
+
+      openssh_macs:
+        description: Allowed MAC algorithms (ordered by preference).
+        type: list
+        elements: str
+        default:
+          - "hmac-sha2-512-etm@openssh.com"
+          - "hmac-sha2-256-etm@openssh.com"
+
+      openssh_kex_algorithms:
+        description: Allowed key exchange algorithms (ordered by preference).
+        type: list
+        elements: str
+        default:
+          - "curve25519-sha256@libssh.org"
+          - "curve25519-sha256"
+          - "diffie-hellman-group16-sha512"
+          - "diffie-hellman-group18-sha512"
+
+      openssh_host_key_algorithms:
+        description: Allowed host key algorithms (ordered by preference).
+        type: list
+        elements: str
+        default:
+          - "ssh-ed25519"
+          - "rsa-sha2-512"
+          - "rsa-sha2-256"
+
+      openssh_host_keys:
+        description: Paths to host key files.
+        type: list
+        elements: str
+        default:
+          - "/etc/ssh/ssh_host_rsa_key"
+          - "/etc/ssh/ssh_host_ed25519_key"
+
+      openssh_compression:
+        description: Enable compression.
+        type: str
+        default: "no"
+        choices: ["yes", "no", "delayed"]
+
+      openssh_login_grace_time:
+        description: Time in seconds to complete authentication.
+        type: int
+        default: 60
+
+      openssh_use_pam:
+        description: Use PAM for authentication.
+        type: bool
+        default: true
+
+      openssh_selinux_chroot_rw_homedirs:
+        description: SELinux boolean to allow SSH chroot read-write access to home directories.
+        type: bool
+        default: false
+
+      openssh_selinux_sysadm_login:
+        description: SELinux boolean to allow SSH to log in as system administrator.
+        type: bool
+        default: false
+
+      # --- Logging Settings ---
+      openssh_log_level:
+        description: SSH daemon log verbosity level.
+        type: str
+        default: "VERBOSE"
+        choices: ["QUIET", "FATAL", "ERROR", "INFO", "VERBOSE", "DEBUG", "DEBUG1", "DEBUG2", "DEBUG3"]
+
+      openssh_syslog_facility:
+        description: Syslog facility for SSH daemon messages.
+        type: str
+        default: "AUTH"
+
+      # --- SSH Client Settings ---
+      openssh_configure_client:
+        description: Whether to deploy the global SSH client configuration.
+        type: bool
+        default: true
+
+      openssh_ssh_config_path:
+        description: Path to the SSH client configuration file.
+        type: str
+        default: "/etc/ssh/ssh_config"
+
+      openssh_client_settings:
+        description: Global SSH client settings dictionary.
+        type: dict
+        default:
+          connection_attempts: 2
+          connect_timeout: 10
+          server_alive_interval: 180
+          server_alive_count_max: 2
+          check_host_ip: true
+          strict_host_key_checking: "yes"
+          update_host_keys: "yes"
+          verify_host_key_dns: "yes"
+          forward_agent: false
+          forward_x11: false
+          global_known_hosts_file: "/etc/ssh/ssh_known_hosts"
+          user_known_hosts_file: "~/.ssh/known_hosts"
+          send_env: ["LANG", "LC_*"]
+        options:
+          connection_attempts:
+            description: Number of connection attempts before failing.
+            type: int
+          connect_timeout:
+            description: Connection timeout in seconds.
+            type: int
+          server_alive_interval:
+            description: Keepalive interval in seconds.
+            type: int
+          server_alive_count_max:
+            description: Maximum keepalive messages before disconnect.
+            type: int
+          check_host_ip:
+            description: Verify host IP against known_hosts.
+            type: bool
+          strict_host_key_checking:
+            description: Host key verification policy.
+            type: str
+          update_host_keys:
+            description: Update known_hosts with new host keys.
+            type: str
+          verify_host_key_dns:
+            description: Verify host key via DNS SSHFP records.
+            type: str
+          forward_agent:
+            description: Forward SSH agent to remote host.
+            type: bool
+          forward_x11:
+            description: Forward X11 connections to remote host.
+            type: bool
+          global_known_hosts_file:
+            description: Path to system-wide known_hosts file.
+            type: str
+          user_known_hosts_file:
+            description: Path to user known_hosts file.
+            type: str
+          send_env:
+            description: Environment variables to send to remote host.
+            type: list
+            elements: str
+
+      # --- Custom Settings ---
+      openssh_custom_options:
+        description: >-
+          Additional sshd_config directives appended at the end of the configuration.
+          Each entry should be a complete configuration line.
+        type: list
+        elements: str
+        default: []

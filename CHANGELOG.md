@@ -5,6 +5,45 @@ All notable changes to this OpenSSH role will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-04-24
+
+### ⚠️ Breaking Changes
+- Internal variables renamed from `_name_` to `__openssh_*` convention per Red Hat CoP 3.1.4
+  - These were never part of the public API but may affect playbooks referencing them directly
+- `openssh_sshd_validate_command` removed from `vars/main.yml` — now only in `defaults/main.yml`, allowing user overrides
+- `openssh_challenge_response_auth` renamed to `openssh_kbd_interactive_auth`
+  - `ChallengeResponseAuthentication` deprecated in OpenSSH 8.7 (bz#3303), replaced by `KbdInteractiveAuthentication`
+  - Template now renders version-appropriate directive automatically
+
+### Added ✅
+- `meta/argument_specs.yml` for formal argument validation (Ansible 2.11+, CoP 3.1.20)
+- `requirements.yml` for collection dependency declaration (`ansible.posix`, `community.general`)
+- README: Role Properties section — idempotent, atomic, rollback, check mode designations (CoP 3.1.17)
+- README: Managed Configuration Files section with replacement warning (CoP 3.1.14)
+- README: Collection Dependencies section with install instructions
+- README: Role Outcome section describing post-execution guarantees
+- OpenSSH version detection in `tasks/algorithms.yml` for conditional directive rendering
+- `ansible-lint` added to CI lint job alongside `yamllint`
+- Idempotency test added to Molecule (second converge run)
+
+### Changed 🔄
+- SELinux booleans now use `openssh_selinux_chroot_rw_homedirs` and `openssh_selinux_sysadm_login` from defaults instead of hardcoded values
+- Handler `restart openssh` now checks `openssh_service_enabled` before restarting
+- Handler changed from `ansible.builtin.systemd` to `ansible.builtin.service` for portability
+- `.ansible-lint` profile upgraded from `min` to `shared`
+- Comment density reduced across all role files — removed boilerplate ASCII-art headers and separators
+- `with_items` replaced with `loop` in `tasks/selinux.yml`
+- Oracle Linux 9 marked as community-tested (not in CI matrix) in README
+
+### Fixed 🔧
+- `tasks/selinux.yml`: `restorecon` task `changed_when: true` replaced with output-based change detection (idempotency fix)
+- Template: deprecated `ChallengeResponseAuthentication` → version-conditional `KbdInteractiveAuthentication` rendering
+
+### Quality Improvements 📈
+- Full compliance with Red Hat CoP Automation Good Practices v2.0.0
+- All internal variables follow `__openssh_*` naming convention
+- Formal argument specification enables `ansible-doc` integration and fail-fast validation
+
 ## [1.0.6] - 2025-11-23
 
 ### Fixed 🔧

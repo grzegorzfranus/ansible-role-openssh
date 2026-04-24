@@ -1,41 +1,54 @@
 ---
-# =============================================================================
-# Ansible Role: OpenSSH - Algorithm/Version Awareness
-# =============================================================================
-# Detect supported algorithms on target and compute effective lists by
-# intersecting secure defaults with what sshd supports, to avoid validation
-# failures on older OpenSSH versions while keeping strict defaults.
-#
-# Flow:
-# 1. Query supported algorithms from ssh client (cipher, mac, kex, hostkey)
-# 2. Compute effective lists by intersecting with secure defaults
-# 3. Expose computed facts for use in templates/configuration
-# =============================================================================
+# Algorithm/Version awareness — detect supported algorithms on target and compute
+# effective lists by intersecting secure defaults with what sshd actually supports.
+# This avoids validation failures on older OpenSSH versions.
+
+- name: OpenSSH | algorithms | Detect OpenSSH version
+  ansible.builtin.command: ssh -V
+  register: __openssh_version_raw
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+# Parse version from stderr (ssh -V outputs to stderr), e.g. "OpenSSH_8.7p1" → "8.7"
+- name: OpenSSH | algorithms | Set OpenSSH version fact
+  ansible.builtin.set_fact:
+    __openssh_version: >-
+      {{ (__openssh_version_raw.stderr | default(''))
+         | regex_search('OpenSSH_(\d+\.\d+)', '\1')
+         | default(['0.0'], true) | first }}
+
+# ChallengeResponseAuthentication deprecated in OpenSSH 8.7 (bz#3303),
+# replaced by KbdInteractiveAuthentication
+- name: OpenSSH | algorithms | Set kbd-interactive authentication directive
+  ansible.builtin.set_fact:
+    __openssh_kbd_interactive_directive: >-
+      {{ 'KbdInteractiveAuthentication' if (__openssh_version is version('8.7', '>=')) else 'ChallengeResponseAuthentication' }}
 
 - name: OpenSSH | algorithms | Query supported ciphers
   ansible.builtin.command: ssh -Q cipher
-  register: _sshd_ciphers_
+  register: __openssh_sshd_ciphers
   changed_when: false
   failed_when: false
   check_mode: false
 
 - name: OpenSSH | algorithms | Query supported MACs
   ansible.builtin.command: ssh -Q mac
-  register: _sshd_macs_
+  register: __openssh_sshd_macs
   changed_when: false
   failed_when: false
   check_mode: false
 
 - name: OpenSSH | algorithms | Query supported KEX algorithms
   ansible.builtin.command: ssh -Q kex
-  register: _sshd_kex_
+  register: __openssh_sshd_kex
   changed_when: false
   failed_when: false
   check_mode: false
 
 - name: OpenSSH | algorithms | Query supported hostkey algorithms
   ansible.builtin.command: ssh -Q key
-  register: _sshd_hostkeys_
+  register: __openssh_sshd_hostkeys
   changed_when: false
   failed_when: false
   check_mode: false
@@ -43,10 +56,10 @@
 - name: OpenSSH | algorithms | Compute effective algorithm lists
   ansible.builtin.set_fact:
     openssh_effective_ciphers: >-
-      {{ openssh_ciphers | select('in', (_sshd_ciphers_.stdout_lines | default([]))) | list }}
+      {{ openssh_ciphers | select('in', (__openssh_sshd_ciphers.stdout_lines | default([]))) | list }}
     openssh_effective_macs: >-
-      {{ openssh_macs | select('in', (_sshd_macs_.stdout_lines | default([]))) | list }}
+      {{ openssh_macs | select('in', (__openssh_sshd_macs.stdout_lines | default([]))) | list }}
     openssh_effective_kex_algorithms: >-
-      {{ openssh_kex_algorithms | select('in', (_sshd_kex_.stdout_lines | default([]))) | list }}
+      {{ openssh_kex_algorithms | select('in', (__openssh_sshd_kex.stdout_lines | default([]))) | list }}
     openssh_effective_host_key_algorithms: >-
-      {{ openssh_host_key_algorithms | select('in', (_sshd_hostkeys_.stdout_lines | default([]))) | list }}
+      {{ openssh_host_key_algorithms | select('in', (__openssh_sshd_hostkeys.stdout_lines | default([]))) | list }}

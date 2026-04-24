@@ -28,11 +28,12 @@ jobs:
 
       - name: 📦 Install dependencies
         run: |
-          pip3 install yamllint
+          pip3 install yamllint ansible-lint ansible
 
       - name: 🔍 Lint code
         run: |
           yamllint .
+          ansible-lint .
 
   molecule:
     name: 🧪 Molecule test
@@ -72,3 +73,4 @@ jobs:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}
+

@@ -47,7 +47,7 @@ LogLevel {{ openssh_log_level }}
 PasswordAuthentication {{ 'yes' if openssh_password_authentication else 'no' }}
 PubkeyAuthentication {{ 'yes' if openssh_pubkey_authentication else 'no' }}
 HostbasedAuthentication {{ 'yes' if openssh_host_based_auth else 'no' }}
-ChallengeResponseAuthentication {{ 'yes' if openssh_challenge_response_auth else 'no' }}
+{{ __openssh_kbd_interactive_directive | default('KbdInteractiveAuthentication') }} {{ 'yes' if openssh_kbd_interactive_auth else 'no' }}
 
 # Public key file location
 {% if openssh_authorized_keys_file is defined %}

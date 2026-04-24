@@ -1,16 +1,4 @@
 ---
-# =============================================================================
-# Ansible Role: OpenSSH - Common Variables
-# =============================================================================
-# This file defines common variables shared across all distributions.
-# These values are distribution-agnostic and apply to all supported systems.
-#
-# Sections:
-#   1. Configuration Validation
-# =============================================================================
-
-# -----------------------------------------------------------------------------
-# 1. Configuration Validation
-# -----------------------------------------------------------------------------
-# SSH daemon validation command
-openssh_sshd_validate_command: '/usr/sbin/sshd -t -f %s'
+# Common internal variables shared across all distributions.
+# NOTE: openssh_sshd_validate_command moved to defaults/main.yml
+# to allow user overrides (vars/ has higher precedence than defaults/).
