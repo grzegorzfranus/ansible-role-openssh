@@ -1,19 +1,6 @@
 ---
-# =============================================================================
-# Ansible Role: OpenSSH - Configuration Tasks
-# =============================================================================
-# This file contains tasks to configure OpenSSH server and client.
-#
-# Flow:
-# 1. Deploy server configuration
-# 2. Deploy client configuration (optional)
-# 3. Set up login banner
-# 4. Configure service status
-# =============================================================================
+# Configuration — deploy SSH server/client configs, banner, and manage service.
 
-# -----------------------------------------------------------------------------
-# 1. Server Configuration
-# -----------------------------------------------------------------------------
 - name: OpenSSH | configure | Deploy SSH server configuration
   become: true
   ansible.builtin.template:
@@ -26,9 +13,6 @@
     validate: "{{ openssh_sshd_validate_command | default('/usr/sbin/sshd -t -f %s') }}"
   notify: restart openssh
 
-# -----------------------------------------------------------------------------
-# 2. Client Configuration
-# -----------------------------------------------------------------------------
 - name: OpenSSH | configure | Deploy SSH client configuration
   become: true
   ansible.builtin.template:
@@ -41,9 +25,6 @@
   when: >
     openssh_configure_client | bool
 
-# -----------------------------------------------------------------------------
-# 3. Banner Setup
-# -----------------------------------------------------------------------------
 - name: OpenSSH | configure | Create banner file
   become: true
   ansible.builtin.template:
@@ -53,9 +34,6 @@
     group: root
     mode: '0644'
 
-# -----------------------------------------------------------------------------
-# 4. Service Status Management
-# -----------------------------------------------------------------------------
 - name: OpenSSH | configure | Ensure SSH service is enabled
   become: true
   ansible.builtin.service:

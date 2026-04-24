@@ -1,25 +1,10 @@
 ---
-# =============================================================================
-# Ansible Role: OpenSSH - RedHat-Specific Variables
-# =============================================================================
-# This file defines variables specific to RedHat-based distributions.
-# These values override or supplement the common variables defined in main.yml.
-#
-# Sections:
-#   1. Package Settings
-#   2. Service Settings
-# =============================================================================
+# RedHat-specific variables.
 
-# -----------------------------------------------------------------------------
-# 1. Package Settings
-# -----------------------------------------------------------------------------
-# Package names for RedHat-based systems
+# Package names
 openssh_packages:
   - openssh-server
   - openssh-clients
 
-# -----------------------------------------------------------------------------
-# 2. Service Settings
-# -----------------------------------------------------------------------------
-# Service name on RedHat-based systems
+# Service name
 openssh_service_name: sshd
