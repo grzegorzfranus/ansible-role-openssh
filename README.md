@@ -1,8 +1,8 @@
 # Ansible Role: OpenSSH
 
-|Source|Version|Tests|License|
+|Source|Version|CI|License|
 |------|-------|-------|-------|
-|[![Source Code](https://img.shields.io/badge/source-github-blue.svg)](https://github.com/grzegorzfranus/ansible-role-openssh)|[![Version](https://img.shields.io/github/v/release/grzegorzfranus/ansible-role-openssh)](https://github.com/grzegorzfranus/ansible-role-openssh/releases)|[![tests](https://github.com/grzegorzfranus/ansible-role-openssh/actions/workflows/test-and-validation.yml/badge.svg)](https://github.com/grzegorzfranus/ansible-role-openssh/actions)|[![Repository License](https://img.shields.io/badge/license-apache2.0-brightgreen.svg)](LICENSE)|
+|[![Source Code](https://img.shields.io/badge/source-github-blue.svg)](https://github.com/grzegorzfranus/ansible-role-openssh)|[![Version](https://img.shields.io/github/v/release/grzegorzfranus/ansible-role-openssh)](https://github.com/grzegorzfranus/ansible-role-openssh/releases)|[![CI](https://github.com/grzegorzfranus/ansible-role-openssh/actions/workflows/ci.yml/badge.svg)](https://github.com/grzegorzfranus/ansible-role-openssh/actions/workflows/ci.yml)|[![Repository License](https://img.shields.io/badge/license-apache2.0-brightgreen.svg)](LICENSE)|
 
 This Ansible role installs and configures OpenSSH, a secure and widely-used implementation of the SSH protocol for both server and client functionality. It provides enterprise-grade security hardening by default while maintaining operational flexibility for various deployment scenarios.
 
@@ -445,6 +445,12 @@ sudo netstat -tnpa | grep 'ESTABLISHED.*:22'
 
 ```
 ansible-role-openssh/
+├── .github/                  # GitHub Actions workflows
+│   └── workflows/           # CI/CD automation
+│       ├── ci.yml           # CI pipeline (reusable ansible-ci.yml)
+│       └── release.yml      # Release Please + Galaxy publish
+├── .release-please-manifest.json # Release Please version manifest
+├── release-please-config.json # Release Please configuration
 ├── defaults/
 │   └── main.yml             # Default variable definitions and secure configuration
 ├── handlers/
@@ -515,26 +521,26 @@ The test suite verifies:
 - ✅ **SELinux**: SELinux policy configuration when applicable
 - ✅ **Connectivity**: SSH service accessibility and functionality
 
-## 🔧 CI/CD Integration
+## CI/CD Pipeline
 
-This role includes comprehensive GitHub Actions workflows for automated testing and deployment:
+### CI Pipeline
 
-### Testing Pipeline
-- **Workflow**: `.github/workflows/test-and-validation.yml`
-- **Name**: `CI/CD`
-- **Purpose**: Automated testing across multiple platforms
-- **Triggers**: Push to main branch, pull requests
-- **Features**:
-  - Multi-platform testing (Ubuntu 22.04, 24.04, Debian 11, 12, Rocky Linux 9)
-  - Ansible lint validation
-  - Molecule test execution
-  - Cross-platform compatibility verification
+Runs on every Pull Request via centralized reusable workflow:
 
-### Galaxy Publishing
-- **Workflow**: `.github/workflows/publish-to-galaxy.yml`
-- **Name**: `Publish`
-- **Purpose**: Automated role publishing to Ansible Galaxy
-- **Triggers**: Tagged releases (v*)
+1. **Branch Name Lint** — enforces naming conventions (`feature/`, `bugfix/`, etc.)
+2. **YAML Lint** — validates all YAML files
+3. **Ansible Lint** — enforces best practices and guidelines compliance
+4. **Security Scan** — TruffleHog secret detection
+5. **Molecule Tests** — matrix across Ubuntu 24.04, Ubuntu 22.04, Debian 12, Debian 11, and Rocky Linux 9
+6. **Merge Check** — aggregated status check for branch protection
+
+### Release & Publish
+
+Automated via [Release Please](https://github.com/googleapis/release-please):
+
+1. Merge to `main` → Release Please creates a Release PR with changelog
+2. Merge Release PR → creates Git tag + GitHub Release
+3. Galaxy publish triggers automatically on release using centralized action
 
 ## Example Playbooks
 
@@ -654,15 +660,23 @@ This role includes comprehensive GitHub Actions workflows for automated testing 
           - "ssh-ed25519"
 ```
 
-## 🤝 Contributing
+## Contributing
 
 Contributions, bug reports, and feature requests are welcome!
 
-- Fork the repository and create your branch from `main`.
-- Make your changes with clear, descriptive commit messages.
-- Ensure your code passes all Molecule and lint tests.
-- Submit a pull request describing your changes and the motivation.
-- For major changes, please open an issue first to discuss what you would like to change.
+- Fork the repository and create your branch from `main`
+- Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages:
+  - `feat:` — new features (minor version bump)
+  - `fix:` — bug fixes (patch version bump)
+  - `docs:` — documentation changes
+  - `refactor:` — code refactoring
+  - `test:` — test additions
+  - `ci:` — CI/CD changes
+  - `chore:` — maintenance tasks
+- Use branch naming convention: `feature/`, `bugfix/`, `hotfix/`, `docs/`, `refactor/`, `test/`, `chore/`, `ci/`
+- Ensure your code passes all CI checks (YAML lint, Ansible lint, Molecule tests)
+- Submit a pull request describing your changes
+- For major changes, please open an issue first to discuss what you would like to change
 
 If you have questions or suggestions, feel free to open an issue or contact the author via GitHub.
 
