@@ -43,4 +43,4 @@
     openssh_config_mode: '0600'
 
   roles:
-    - role: grzegorzfranus.openssh
+    - role: ../../..
