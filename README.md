@@ -364,6 +364,10 @@ openssh_custom_options:
   - "MaxStartups 10:30:100"
 ```
 
+## 📤 Role Output
+
+This role does not set any public output facts. All internal facts use the `__openssh_` double-underscore prefix and are not part of the public interface.
+
 ## 🔍 Verification
 
 After deployment, verify SSH configuration and connectivity:
@@ -441,7 +445,38 @@ sudo netstat -tnpa | grep 'ESTABLISHED.*:22'
     - role: grzegorzfranus.openssh
 ```
 
-## 📁 Project Directory Structure
+## 🔧 Troubleshooting
+
+### Service and Configuration Issues
+
+```bash
+# Check service status (Debian/Ubuntu)
+sudo systemctl status ssh
+
+# Check service status (RHEL/Rocky Linux)
+sudo systemctl status sshd
+
+# Verify configuration syntax before restarting
+sudo sshd -t
+
+# View sshd daemon logs
+sudo journalctl -u ssh -f
+```
+
+### Connection and Authentication Issues
+
+```bash
+# Test connection with verbose debug output
+ssh -vvv user@hostname
+
+# Test connectivity on specific port (e.g., 2222)
+ssh -p 2222 user@hostname
+
+# Inspect client-side effective configuration
+ssh -G hostname
+```
+
+## 📁 File Structure
 
 ```
 ansible-role-openssh/
