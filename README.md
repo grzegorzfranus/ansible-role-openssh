@@ -75,8 +75,9 @@ List of officially supported operating systems:
 | Ubuntu | 22.04 (Jammy) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 12 (Bookworm) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 11 (Bullseye) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
-| Rocky Linux | 9 | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
-| Oracle Linux | 9 | ![~](https://img.shields.io/badge/~-community--tested-yellow.svg) |
+| EL (RHEL, Rocky, Alma, Oracle) | 9 | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
+
+> **Note**: EL 8 is not supported — `python3-dnf` bindings are compiled for Python 3.6, which is incompatible with ansible-core >= 2.17. Use EL 9 or newer.
 
 ### Ansible version
 
