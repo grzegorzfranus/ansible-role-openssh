@@ -4,10 +4,12 @@ galaxy_info:
   author: Grzegorz Franus
   namespace: grzegorzfranus
   description: >
-    Ansible role to install and configure OpenSSH server with security hardening.
+    Ansible role to install, configure, and security-harden OpenSSH server and client.
+    Features modern cryptographic standards, access controls, custom banner deployment,
+    and comprehensive SELinux policy configuration.
   license: Apache-2.0
   company: EWARE
-  min_ansible_version: "2.15"
+  min_ansible_version: "2.16"
 
   platforms:
     - name: Debian

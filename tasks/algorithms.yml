@@ -1,8 +1,12 @@
 ---
-# Algorithm/Version awareness — detect supported algorithms on target and compute
-# effective lists by intersecting secure defaults with what sshd actually supports.
-# This avoids validation failures on older OpenSSH versions.
+# =============================================================================
+# Ansible Role: OpenSSH - Tasks: Algorithms
+# =============================================================================
+# Detect supported algorithms on target and compute effective lists.
+# =============================================================================
 
+# Justification: Use command module because retrieving the target SSH client version
+# requires invoking the 'ssh -V' command, which has no native Ansible module.
 - name: OpenSSH | algorithms | Detect OpenSSH version
   ansible.builtin.command: ssh -V
   register: __openssh_version_raw
@@ -25,6 +29,8 @@
     __openssh_kbd_interactive_directive: >-
       {{ 'KbdInteractiveAuthentication' if (__openssh_version is version('8.7', '>=')) else 'ChallengeResponseAuthentication' }}
 
+# Justification: Use command module because querying the client's supported ciphers
+# requires running 'ssh -Q cipher', which has no native Ansible module.
 - name: OpenSSH | algorithms | Query supported ciphers
   ansible.builtin.command: ssh -Q cipher
   register: __openssh_sshd_ciphers
@@ -32,6 +38,8 @@
   failed_when: false
   check_mode: false
 
+# Justification: Use command module because querying the client's supported MACs
+# requires running 'ssh -Q mac', which has no native Ansible module.
 - name: OpenSSH | algorithms | Query supported MACs
   ansible.builtin.command: ssh -Q mac
   register: __openssh_sshd_macs
@@ -39,6 +47,8 @@
   failed_when: false
   check_mode: false
 
+# Justification: Use command module because querying the client's supported KEX algorithms
+# requires running 'ssh -Q kex', which has no native Ansible module.
 - name: OpenSSH | algorithms | Query supported KEX algorithms
   ansible.builtin.command: ssh -Q kex
   register: __openssh_sshd_kex
@@ -46,6 +56,8 @@
   failed_when: false
   check_mode: false
 
+# Justification: Use command module because querying the client's supported host key algorithms
+# requires running 'ssh -Q key', which has no native Ansible module.
 - name: OpenSSH | algorithms | Query supported hostkey algorithms
   ansible.builtin.command: ssh -Q key
   register: __openssh_sshd_hostkeys

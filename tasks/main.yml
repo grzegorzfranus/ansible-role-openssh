@@ -1,5 +1,9 @@
 ---
+# =============================================================================
+# Ansible Role: OpenSSH - Tasks: Main
+# =============================================================================
 # Main orchestration file — includes all role components in correct order.
+# =============================================================================
 
 - name: OpenSSH | main | Check supported operating system
   become: true

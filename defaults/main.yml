@@ -1,8 +1,33 @@
 ---
-# Default variables for the OpenSSH role.
-# Override these in your playbook or inventory. Security-hardened defaults.
+# =============================================================================
+# Ansible Role: OpenSSH - Default Variables
+# =============================================================================
+# This file defines default configuration values for the OpenSSH role.
+# These values can be overridden by setting them in your playbook or inventory.
+#
+# Supported OS distributions:
+# - Ubuntu 24.04 (Noble) and variants
+# - Ubuntu 22.04 (Jammy) and variants
+# - Debian 12 (Bookworm) and variants
+# - Debian 11 (Bullseye) and variants
+# - EL9: Rocky Linux 9, RHEL 9, AlmaLinux 9, CentOS Stream 9
+#
+# Sections:
+#   1. General Settings
+#   2. SSH Server Settings
+#   3. Authentication Settings
+#   4. Network Settings
+#   5. Security Settings
+#   6. Logging Settings
+#   7. SSH Client Settings
+#   8. Custom Settings
+# =============================================================================
 
-# --- General Settings ---
+# -----------------------------------------------------------------------------
+# 1. General Settings
+# -----------------------------------------------------------------------------
+# Role execution control and basic service configuration
+
 
 # Which parts of the role to execute: 'all', 'install', 'config'
 openssh_role_action: "all"
@@ -13,7 +38,10 @@ openssh_service_enabled: true
 # Require explicit opt-in to stop/disable SSH over an SSH connection
 openssh_allow_service_stop: false
 
-# --- SSH Server Settings ---
+# -----------------------------------------------------------------------------
+# 2. SSH Server Settings
+# -----------------------------------------------------------------------------
+# Configuration settings for the SSH daemon/server (sshd_config)
 
 openssh_sshd_config_path: "/etc/ssh/sshd_config"
 openssh_sshd_config_dir: "/etc/ssh/sshd_config.d"
@@ -43,7 +71,10 @@ openssh_max_sessions: 5
 # Format: start:rate:full
 openssh_max_startups: "10:30:60"
 
-# --- Authentication Settings ---
+# -----------------------------------------------------------------------------
+# 3. Authentication Settings
+# -----------------------------------------------------------------------------
+# Configuration settings for authentication methods and permissions
 
 openssh_permit_root_login: "no"
 openssh_permit_empty_passwords: false
@@ -75,13 +106,19 @@ openssh_deny_groups: []
 openssh_authorized_keys_file: ".ssh/authorized_keys"
 openssh_max_auth_tries: 3
 
-# --- Network Settings ---
+# -----------------------------------------------------------------------------
+# 4. Network Settings
+# -----------------------------------------------------------------------------
+# Networking, listen addresses, and family settings
 
 openssh_use_dns: false
 openssh_address_family: "any"  # 'inet', 'inet6', 'any'
 openssh_accept_env: ["LANG", "LC_*"]
 
-# --- Security Settings ---
+# -----------------------------------------------------------------------------
+# 5. Security Settings
+# -----------------------------------------------------------------------------
+# Cryptographic algorithms, ciphers, MACs, KEX, and system security policies
 
 openssh_strict_modes: true
 
@@ -121,12 +158,18 @@ openssh_use_pam: true
 openssh_selinux_chroot_rw_homedirs: false
 openssh_selinux_sysadm_login: false
 
-# --- Logging Settings ---
+# -----------------------------------------------------------------------------
+# 6. Logging Settings
+# -----------------------------------------------------------------------------
+# SSH daemon logging verbosity and facility options
 
 openssh_log_level: "VERBOSE"  # QUIET, FATAL, ERROR, INFO, VERBOSE, DEBUG, DEBUG1-3
 openssh_syslog_facility: "AUTH"
 
-# --- SSH Client Settings ---
+# -----------------------------------------------------------------------------
+# 7. SSH Client Settings
+# -----------------------------------------------------------------------------
+# Configuration settings for the outbound SSH client (ssh_config)
 
 openssh_configure_client: true
 openssh_ssh_config_path: "/etc/ssh/ssh_config"
@@ -146,6 +189,9 @@ openssh_client_settings:
   user_known_hosts_file: "~/.ssh/known_hosts"
   send_env: ["LANG", "LC_*"]
 
-# --- Custom Settings ---
+# -----------------------------------------------------------------------------
+# 8. Custom Settings
+# -----------------------------------------------------------------------------
+# Additional custom sshd_config options appended at the end
 # Additional sshd_config lines appended at the end of the configuration file
 openssh_custom_options: []

@@ -1,5 +1,9 @@
 ---
-# Prerequisites — verify system state before installation and configuration.
+# =============================================================================
+# Ansible Role: OpenSSH - Tasks: Prerequisites
+# =============================================================================
+# Verify system state and prerequisites before installation and configuration.
+# =============================================================================
 
 - name: OpenSSH | prerequisites | Set fact for check mode status
   ansible.builtin.set_fact:

@@ -1,5 +1,9 @@
 ---
-# Configuration — deploy SSH server/client configs, banner, and manage service.
+# =============================================================================
+# Ansible Role: OpenSSH - Tasks: Configure
+# =============================================================================
+# Deploy SSH server/client configurations, banner, and manage SSH service.
+# =============================================================================
 
 - name: OpenSSH | configure | Deploy SSH server configuration
   become: true
