@@ -1,5 +1,9 @@
 ---
-# SELinux configuration — applies SELinux policies for OpenSSH if SELinux is active.
+# =============================================================================
+# Ansible Role: OpenSSH - Tasks: SELinux
+# =============================================================================
+# Configure SELinux contexts, restorecon, and system booleans for OpenSSH.
+# =============================================================================
 
 - name: "OpenSSH | selinux | Set default SELinux mode to disabled"
   ansible.builtin.set_fact:
@@ -10,6 +14,8 @@
     path: /usr/sbin/getenforce
   register: __openssh_getenforce_bin
 
+# Justification: Use command module because retrieving the active SELinux enforcement status
+# requires running '/usr/sbin/getenforce', which has no native Ansible module.
 - name: "OpenSSH | selinux | Collect getenforce output of SELinux"
   ansible.builtin.command: /usr/sbin/getenforce
   register: __openssh_sestatus
@@ -60,6 +66,8 @@
         setype: ssh_config_t
         state: present
 
+    # Justification: Use command module because dry-running restorecon context checking
+    # requires running 'restorecon' CLI tool with specific flags, which has no native Ansible module.
     - name: "OpenSSH | selinux | Check if restorecon would change contexts (dry-run)"
       become: true
       ansible.builtin.command:
@@ -69,6 +77,8 @@
       check_mode: false
 
     # Only run restorecon if dry-run detected pending changes
+    # Justification: Use command module because executing restorecon directory relabeling
+    # requires running 'restorecon' CLI tool, which has no native Ansible module.
     - name: "OpenSSH | selinux | Restore SELinux contexts for SSH configuration"
       become: true
       ansible.builtin.command:

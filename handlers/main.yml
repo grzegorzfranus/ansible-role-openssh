@@ -1,6 +1,9 @@
 ---
-# Handlers are triggered by 'notify: restart openssh' in tasks.
-# The service_enabled guard prevents restarting a deliberately disabled service.
+# =============================================================================
+# Ansible Role: OpenSSH - Handlers
+# =============================================================================
+# Service management handlers triggered by tasks.
+# =============================================================================
 
 - name: OpenSSH | handlers | Restart OpenSSH service
   become: true

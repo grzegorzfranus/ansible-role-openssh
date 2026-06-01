@@ -1,5 +1,9 @@
 ---
-# Assertions — validate all role variables before execution.
+# =============================================================================
+# Ansible Role: OpenSSH - Tasks: Assertions
+# =============================================================================
+# Validate all role variables before execution.
+# =============================================================================
 - name: OpenSSH | assert | Validate role action parameter
   ansible.builtin.assert:
     that:

@@ -1,4 +1,9 @@
 ---
+# =============================================================================
+# Ansible Role: OpenSSH - Tasks: Install
+# =============================================================================
+# Install OpenSSH package dependencies.
+# =============================================================================
 - name: OpenSSH | install | Install OpenSSH packages
   become: true
   ansible.builtin.package:

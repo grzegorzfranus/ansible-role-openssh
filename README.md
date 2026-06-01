@@ -45,24 +45,7 @@ After successful execution, this role guarantees:
 - SELinux policies configured (when SELinux is active on RedHat systems)
 - All cryptographic algorithms validated against target system capabilities
 
-## 📋 Role Properties
 
-| Property | Value |
-|----------|-------|
-| **Idempotent** | Yes — re-running with same parameters produces no changes |
-| **Atomic** | No — partial execution may leave partial configuration |
-| **Roll-back** | Partial — configuration files are backed up before changes (`backup: true`) |
-| **Check Mode** | Supported — role runs in check mode without making changes |
-
-### Managed Configuration Files
-
-> **⚠️ Warning:** The following files are **fully replaced** (not modified) by this role. Manual changes will be overwritten on next run.
-
-| File | Managed When |
-|------|--------------|
-| `/etc/ssh/sshd_config` | Always |
-| `/etc/ssh/ssh_config` | When `openssh_configure_client: true` |
-| `/etc/issue.net` | Always (banner) |
 
 ## 📋 Requirements
 
@@ -364,6 +347,25 @@ openssh_custom_options:
   - "MaxStartups 10:30:100"
 ```
 
+## 📌 Role Properties
+
+| Property | Value | Description |
+|----------|-------|-------------|
+| **Idempotent** | ✅ Yes | Running the role multiple times with the same parameters produces the same result. |
+| **Atomic** | ❌ No | The role can be partially applied. A failure mid-execution may leave the system in an intermediate state. |
+| **Check Mode** | ✅ Supported | Most tasks work in check mode. Mutating commands (modifying sshd_config) are skipped. |
+| **Diff Mode** | ✅ Supported | Template tasks support diff mode for change preview. |
+
+### Managed Configuration Files
+
+> **⚠️ Warning:** The following files are **fully replaced** (not modified) by this role. Manual changes will be overwritten on next run.
+
+| File | Managed When |
+|------|--------------|
+| `/etc/ssh/sshd_config` | Always |
+| `/etc/ssh/ssh_config` | When `openssh_configure_client: true` |
+| `/etc/issue.net` | Always (banner) |
+
 ## 📤 Role Output
 
 This role does not set any public output facts. All internal facts use the `__openssh_` double-underscore prefix and are not part of the public interface.
@@ -423,27 +425,19 @@ sudo netstat -tnpa | grep 'ESTABLISHED.*:22'
 - ✅ **File Permissions**: Proper ownership and permissions for all SSH files
 - ✅ **Audit Logging**: Verbose logging with syslog integration
 
-### Enhanced Security Configuration
+## 🔒 Security considerations
 
-```yaml
----
-- name: Maximum Security SSH Configuration
-  hosts: critical_servers
-  become: true
-  vars:
-    openssh_port: 2222
-    openssh_permit_root_login: "no"
-    openssh_password_authentication: false
-    openssh_max_auth_tries: 2
-    openssh_allow_groups: ["sshusers"]
-    openssh_client_alive_interval: 300
-    openssh_client_alive_count_max: 2
-    openssh_log_level: "VERBOSE"
-    openssh_use_dns: false
-    openssh_strict_modes: true
-  roles:
-    - role: grzegorzfranus.openssh
-```
+- Use Ansible Vault for any sensitive custom settings or keys.
+- Configuration templates enforce strict file permissions (`0600` for host keys, `0600` for sshd_config).
+
+## 🧪 Check mode behavior
+
+- Validation of variables and algorithm queries run in check mode.
+- Mutating actions (modifying configuration files, restarting services) are safely skipped in check mode.
+
+## 🏷️ Tags usage
+
+- Use `--tags` to select execution path: `validate`, `install`, `configure`, `selinux`, `requirements`.
 
 ## 🔧 Troubleshooting
 
@@ -695,7 +689,7 @@ Automated via [Release Please](https://github.com/googleapis/release-please):
           - "ssh-ed25519"
 ```
 
-## Contributing
+## 🤝 Contributing
 
 Contributions, bug reports, and feature requests are welcome!
 
