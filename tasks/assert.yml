@@ -32,7 +32,6 @@
     fail_msg: "Invalid allow_service_stop setting '{{ openssh_allow_service_stop | default('undefined') }}'. Must be boolean (true/false)"
     success_msg: "Safe service stop flag is valid: {{ openssh_allow_service_stop }}"
 
-# --- SSH Server Settings ---
 - name: OpenSSH | assert | Validate sshd config path
   ansible.builtin.assert:
     that:
@@ -149,7 +148,6 @@
     fail_msg: "Invalid session limits settings. Check maximum sessions and startup configuration"
     success_msg: "Session limits are valid: MaxSessions={{ openssh_max_sessions }}, MaxStartups={{ openssh_max_startups }}"
 
-# --- Service and Package Settings ---
 - name: OpenSSH | assert | Validate service name variable
   ansible.builtin.assert:
     that:
@@ -168,7 +166,6 @@
     fail_msg: "openssh_packages must be a non-empty list of package names"
     success_msg: "Package list is valid with {{ openssh_packages | length }} entries"
 
-# --- Authentication Settings ---
 - name: OpenSSH | assert | Validate root login permissions
   ansible.builtin.assert:
     that:
@@ -267,7 +264,6 @@
     fail_msg: "openssh_max_auth_tries must be a positive number"
     success_msg: "Maximum authentication attempts is valid: {{ openssh_max_auth_tries }}"
 
-# --- Network Settings ---
 - name: OpenSSH | assert | Validate network and connectivity settings
   ansible.builtin.assert:
     that:
@@ -287,7 +283,6 @@
       DNS={{ openssh_use_dns }}, Family={{ openssh_address_family }},
       AcceptEnv={{ openssh_accept_env | length }} vars
 
-# --- Security Settings ---
 - name: OpenSSH | assert | Validate strict mode setting
   ansible.builtin.assert:
     that:
@@ -362,7 +357,6 @@
     fail_msg: "SELinux settings for OpenSSH must be boolean values"
     success_msg: "SELinux settings are valid: ChrootRW={{ openssh_selinux_chroot_rw_homedirs }}, SysAdmLogin={{ openssh_selinux_sysadm_login }}"
 
-# --- Logging Settings ---
 - name: OpenSSH | assert | Validate logging configuration
   ansible.builtin.assert:
     that:
@@ -374,7 +368,6 @@
     fail_msg: "logging settings contain invalid values"
     success_msg: "Logging configuration is valid: Level={{ openssh_log_level }}, Facility={{ openssh_syslog_facility }}"
 
-# --- SSH Client Settings ---
 - name: OpenSSH | assert | Validate client configuration flag
   ansible.builtin.assert:
     that:
@@ -436,7 +429,6 @@
       ConnTimeout={{ openssh_client_settings.connect_timeout }}s,
       StrictHostKeyCheck={{ openssh_client_settings.strict_host_key_checking }}
 
-# --- Custom Options Validation ---
 - name: OpenSSH | assert | Validate custom options format
   ansible.builtin.assert:
     that:
