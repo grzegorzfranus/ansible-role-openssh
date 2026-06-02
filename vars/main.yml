@@ -1,4 +1,8 @@
 ---
+# =============================================================================
+# Ansible Role: OpenSSH - Common Variables
+# =============================================================================
 # Common internal variables shared across all distributions.
 # NOTE: openssh_sshd_validate_command moved to defaults/main.yml
 # to allow user overrides (vars/ has higher precedence than defaults/).
+# =============================================================================
