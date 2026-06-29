@@ -16,7 +16,7 @@ jobs:
   # 1. BRANCH NAME VALIDATION (Pre-hook)
   # ================================================================
   branch-name-lint:
-    name: "Branch Name Lint"
+    name: "Validate Branch Naming"
     runs-on: ubuntu-latest
     steps:
       - name: "Validate branch name"
@@ -75,7 +75,7 @@ jobs:
   # Runs first to fail fast and save runner execution minutes.
   # ================================================================
   pr-title-lint:
-    name: "PR Title Lint"
+    name: "Validate PR Title Format"
     runs-on: ubuntu-latest
     steps:
       - name: "Validate PR title"
@@ -132,15 +132,15 @@ jobs:
   # ================================================================
   ci:
     needs: [branch-name-lint, pr-title-lint]
-    uses: grzegorzfranus/github-actions-workflows/.github/workflows/ansible-ci.yml@main
+    uses: grzegorzfranus/github-workflows/.github/workflows/ansible-ci.yml@main
     with:
-      molecule-distros: '["ubuntu2404", "ubuntu2204", "debian12", "debian11", "rockylinux9"]'
+      molecule-distros: '["ubuntu2604", "ubuntu2404", "ubuntu2204", "debian13", "debian12", "debian11", "rockylinux9"]'
 
   # ================================================================
   # 3. MERGE CHECK — Caller-level gate for branch protection
   # ================================================================
   merge-check:
-    name: "Merge Check"
+    name: "Merge Check Gate"
     needs: [branch-name-lint, pr-title-lint, ci]
     if: always()
     runs-on: ubuntu-latest

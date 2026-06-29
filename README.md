@@ -68,11 +68,14 @@ ansible-galaxy collection install ansible.posix community.general
 ```
 
 ### Supported operating systems
-List of officially supported operating systems:
+List of officially supported operating systems for this role:
+
 | OS Family | Version | Status |
 |-----------|---------|---------|
+| Ubuntu | 26.04 (Resolute) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Ubuntu | 24.04 (Noble) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Ubuntu | 22.04 (Jammy) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
+| Debian | 13 (Trixie)   | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 12 (Bookworm) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 11 (Bullseye) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | EL (RHEL, Rocky, Alma, Oracle) | 9 | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
@@ -440,6 +443,14 @@ sudo netstat -tnpa | grep 'ESTABLISHED.*:22'
 
 - Use `--tags` to select execution path: `validate`, `install`, `configure`, `selinux`, `requirements`.
 
+## 🌐 Network resilience
+
+- OpenSSH server binds to TCP port 22 (or custom specified via `openssh_port`). Ensure that host firewalls (like ufw, firewalld, nftables) and cloud security groups are configured to allow incoming traffic on the specified TCP port.
+
+## 🧰 Repository management
+
+- This role relies on default OS package repositories to install OpenSSH packages. It does not configure custom upstream repository sources directly.
+
 ## 🔧 Troubleshooting
 
 ### Service and Configuration Issues
@@ -475,18 +486,27 @@ ssh -G hostname
 
 ```
 ansible-role-openssh/
-├── .github/                  # GitHub Actions workflows
-│   └── workflows/           # CI/CD automation
-│       ├── ci.yml           # CI pipeline (reusable ansible-ci.yml)
-│       └── release.yml      # Release Please + Galaxy publish
-├── .release-please-manifest.json # Release Please version manifest
-├── release-please-config.json # Release Please configuration
+├── .github/
+│   ├── ISSUE_TEMPLATE/                # Issue templates for bug, feature, task
+│   │   ├── bug_report.yml
+│   │   ├── config.yml
+│   │   ├── feature_request.yml
+│   │   └── task.yml
+│   ├── PULL_REQUEST_TEMPLATE/         # Pull request description template
+│   │   └── pull_request_template.md
+│   ├── workflows/
+│   │   ├── ci.yml                     # CI pipeline
+│   │   └── release.yml                # Release Please + Galaxy publish
+│   └── dependabot.yml                 # Dependabot configuration for GitHub Actions
 ├── defaults/
 │   └── main.yml             # Default variable definitions and secure configuration
 ├── handlers/
 │   └── main.yml             # Service restart and reload handlers
 ├── meta/
-│   └── main.yml             # Role metadata and dependency information
+│   ├── main.yml             # Role metadata and dependency information
+│   └── argument_specs.yml   # Native argument specification validation
+├── molecule/                # Molecule testing framework
+│   └── default/             # Default testing scenario
 ├── tasks/
 │   ├── main.yml             # Main task orchestration and flow control
 │   ├── assert.yml           # Variable validation and system compatibility checks
@@ -507,12 +527,14 @@ ansible-role-openssh/
 
 ## 🏷️ Tags
 
-- `always` - Tasks that always run (variable loading and validation)
-- `setup` - Setup tasks including OS-specific variables, requirements, installation, and configuration
-- `requirements` - System requirement verification and preparation tasks
-- `install` - OpenSSH package installation tasks
-- `configure` - SSH server and client configuration tasks
-- `validate` - Variable validation and system compatibility checks
+| Tag | Description |
+|-----|-------------|
+| `always` | Tasks that always run (variable loading and validation) |
+| `setup` | Setup tasks including OS-specific variables, requirements, installation, and configuration |
+| `requirements` | System requirement verification and preparation tasks |
+| `install` | OpenSSH package installation tasks |
+| `configure` | SSH server and client configuration tasks |
+| `validate` | Variable validation and system compatibility checks |
 
 ## 🧪 Testing
 
