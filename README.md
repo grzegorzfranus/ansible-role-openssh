@@ -724,6 +724,7 @@ Contributions, bug reports, and feature requests are welcome!
   - `ci:` — CI/CD changes
   - `chore:` — maintenance tasks
 - Use branch naming convention: `feature/`, `bugfix/`, `hotfix/`, `docs/`, `refactor/`, `test/`, `chore/`, `ci/`
+- Centralized workflows from [github-workflows](https://github.com/grzegorzfranus/github-workflows) version `v3.0.1` are used to run CI/CD pipelines
 - Ensure your code passes all CI checks (YAML lint, Ansible lint, Molecule tests)
 - Submit a pull request describing your changes
 - For major changes, please open an issue first to discuss what you would like to change
