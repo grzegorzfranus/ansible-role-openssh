@@ -2,8 +2,15 @@
 # =============================================================================
 # Ansible Role: OpenSSH - Tasks: Assertions
 # =============================================================================
-# Validate all role variables before execution.
+# Validates role configuration parameters and preflight requirements.
+# Basic type/choice validation is handled by meta/argument_specs.yml.
 # =============================================================================
+
+# -----------------------------------------------------------------------------
+# 1. General Settings
+# -----------------------------------------------------------------------------
+# Validates role execution scope and service state management toggles.
+
 - name: OpenSSH | assert | Validate role action parameter
   ansible.builtin.assert:
     that:
@@ -31,6 +38,12 @@
       - openssh_allow_service_stop is boolean
     fail_msg: "Invalid allow_service_stop setting '{{ openssh_allow_service_stop | default('undefined') }}'. Must be boolean (true/false)"
     success_msg: "Safe service stop flag is valid: {{ openssh_allow_service_stop }}"
+
+# -----------------------------------------------------------------------------
+# 2. SSH Server Settings
+# -----------------------------------------------------------------------------
+# Validates daemon configuration paths, listener settings, forwarding policy,
+# login presentation, session timeouts, and the OS-specific package and service names.
 
 - name: OpenSSH | assert | Validate sshd config path
   ansible.builtin.assert:
@@ -166,6 +179,11 @@
     fail_msg: "openssh_packages must be a non-empty list of package names"
     success_msg: "Package list is valid with {{ openssh_packages | length }} entries"
 
+# -----------------------------------------------------------------------------
+# 3. Authentication Settings
+# -----------------------------------------------------------------------------
+# Validates authentication methods, access control lists, and attempt limits.
+
 - name: OpenSSH | assert | Validate root login permissions
   ansible.builtin.assert:
     that:
@@ -264,6 +282,11 @@
     fail_msg: "openssh_max_auth_tries must be a positive number"
     success_msg: "Maximum authentication attempts is valid: {{ openssh_max_auth_tries }}"
 
+# -----------------------------------------------------------------------------
+# 4. Network Settings
+# -----------------------------------------------------------------------------
+# Validates DNS resolution, address family, and forwarded environment variables.
+
 - name: OpenSSH | assert | Validate network and connectivity settings
   ansible.builtin.assert:
     that:
@@ -282,6 +305,11 @@
       Network settings are valid:
       DNS={{ openssh_use_dns }}, Family={{ openssh_address_family }},
       AcceptEnv={{ openssh_accept_env | length }} vars
+
+# -----------------------------------------------------------------------------
+# 5. Security Settings
+# -----------------------------------------------------------------------------
+# Validates cryptographic algorithm lists, host keys, grace periods, PAM, and SELinux settings.
 
 - name: OpenSSH | assert | Validate strict mode setting
   ansible.builtin.assert:
@@ -357,6 +385,11 @@
     fail_msg: "SELinux settings for OpenSSH must be boolean values"
     success_msg: "SELinux settings are valid: ChrootRW={{ openssh_selinux_chroot_rw_homedirs }}, SysAdmLogin={{ openssh_selinux_sysadm_login }}"
 
+# -----------------------------------------------------------------------------
+# 6. Logging Settings
+# -----------------------------------------------------------------------------
+# Validates log verbosity level and syslog facility.
+
 - name: OpenSSH | assert | Validate logging configuration
   ansible.builtin.assert:
     that:
@@ -367,6 +400,11 @@
       - openssh_syslog_facility is string
     fail_msg: "logging settings contain invalid values"
     success_msg: "Logging configuration is valid: Level={{ openssh_log_level }}, Facility={{ openssh_syslog_facility }}"
+
+# -----------------------------------------------------------------------------
+# 7. SSH Client Settings
+# -----------------------------------------------------------------------------
+# Validates client configuration toggle, path, and connection security settings.
 
 - name: OpenSSH | assert | Validate client configuration flag
   ansible.builtin.assert:
@@ -428,6 +466,11 @@
       ConnAttempts={{ openssh_client_settings.connection_attempts }},
       ConnTimeout={{ openssh_client_settings.connect_timeout }}s,
       StrictHostKeyCheck={{ openssh_client_settings.strict_host_key_checking }}
+
+# -----------------------------------------------------------------------------
+# 8. Custom Settings
+# -----------------------------------------------------------------------------
+# Validates free-form directives appended to the generated configuration.
 
 - name: OpenSSH | assert | Validate custom options format
   ansible.builtin.assert:
