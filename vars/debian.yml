@@ -1,5 +1,10 @@
 ---
-# Debian-specific variables.
+# =============================================================================
+# Ansible Role: OpenSSH - Debian Family Variables
+# =============================================================================
+# Internal constants for the Debian OS family, loaded by the first_found
+# cascade in tasks/main.yml. Not intended to be overridden by users.
+# =============================================================================
 
 # Package names
 openssh_packages:

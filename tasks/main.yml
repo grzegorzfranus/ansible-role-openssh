@@ -1,8 +1,8 @@
 ---
 # =============================================================================
-# Ansible Role: OpenSSH - Tasks: Main
+# Ansible Role: OpenSSH - Tasks: Main Entrypoint
 # =============================================================================
-# Main orchestration file — includes all role components in correct order.
+# Flow: os check → include_vars → assert → algorithms → prerequisites → install → selinux → configure
 # =============================================================================
 
 - name: OpenSSH | main | Check supported operating system

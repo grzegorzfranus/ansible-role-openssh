@@ -1,4 +1,7 @@
 ---
+# =============================================================================
+# Ansible Role: OpenSSH - Galaxy Metadata
+# =============================================================================
 galaxy_info:
   role_name: openssh
   author: Grzegorz Franus
@@ -12,14 +15,16 @@ galaxy_info:
   min_ansible_version: "2.16"
 
   platforms:
-    - name: Debian
-      versions:
-        - "bookworm"
-        - "bullseye"
     - name: Ubuntu
       versions:
-        - "noble"
-        - "jammy"
+        - resolute
+        - noble
+        - jammy
+    - name: Debian
+      versions:
+        - trixie
+        - bookworm
+        - bullseye
     - name: EL
       versions:
         - "9"
