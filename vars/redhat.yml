@@ -7,9 +7,9 @@
 # =============================================================================
 
 # Package names
-openssh_packages:
+__openssh_packages:
   - openssh-server
   - openssh-clients
 
 # Service name
-openssh_service_name: sshd
+__openssh_service_name: sshd

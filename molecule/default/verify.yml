@@ -14,7 +14,7 @@
     openssh_config_owner: root
     openssh_config_group: root
     openssh_config_mode: '0600'
-    openssh_server_package: "{{ openssh_packages[0] | default('openssh-server') }}"
+    openssh_server_package: "{{ __openssh_packages[0] | default('openssh-server') }}"
 
   tasks:
     - name: Verify | Gather OS specific variables
@@ -64,7 +64,7 @@
     # 3. Service Status Verification
     - name: Verify | Check if sshd service is running
       ansible.builtin.service:
-        name: "{{ openssh_service_name }}"
+        name: "{{ __openssh_service_name }}"
         state: started
       register: _service_result_
       ignore_errors: true
@@ -72,7 +72,7 @@
 
     - name: Verify | Check if sshd service is enabled
       ansible.builtin.service:
-        name: "{{ openssh_service_name }}"
+        name: "{{ __openssh_service_name }}"
         state: started
         enabled: true
       register: _service_enabled_result_

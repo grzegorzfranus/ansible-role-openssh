@@ -197,8 +197,6 @@ Customize for specific security requirements:
 | `openssh_sshd_config_dir` | SSH daemon configuration directory for drop-in files | `"/etc/ssh/sshd_config.d"` |
 | `openssh_port` | SSH daemon port | `22` |
 | `openssh_sshd_validate_command` | Command used to validate sshd config (string with %s path placeholder) | `'/usr/sbin/sshd -t -f %s'` |
-| `openssh_service_name` | SSH service name (OS-specific) | Debian: `ssh`, RedHat: `sshd` |
-| `openssh_packages` | Package list (OS-specific) | Debian: `[openssh-server, openssh-client]`, RedHat: `[openssh-server, openssh-clients]` |
 | `openssh_listen_addresses` | List of IP addresses to listen on (empty for all) | `[]` |
 | `openssh_tcp_forwarding` | Allow TCP forwarding | `false` |
 | `openssh_agent_forwarding` | Allow agent forwarding | `false` |
@@ -373,6 +371,15 @@ openssh_custom_options:
 ## 📤 Role Output
 
 This role does not set any public output facts. All internal facts use the `__openssh_` double-underscore prefix and are not part of the public interface.
+
+### Internal OS-derived variables
+
+The following values are resolved from `vars/` according to the detected OS family. They carry the `__openssh_` prefix, are **not** part of the public interface, and are not intended to be overridden — setting them by hand desynchronises the package list from the service name and from the OS the role actually detected.
+
+| Variable | Debian family | RedHat family |
+|----------|---------------|---------------|
+| `__openssh_packages` | `[openssh-server, openssh-client]` | `[openssh-server, openssh-clients]` |
+| `__openssh_service_name` | `ssh` | `sshd` |
 
 ## 🔍 Verification
 
