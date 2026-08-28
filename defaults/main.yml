@@ -6,8 +6,10 @@
 # These values can be overridden by setting them in your playbook or inventory.
 #
 # Supported OS distributions:
+# - Ubuntu 26.04 (Resolute) and variants
 # - Ubuntu 24.04 (Noble) and variants
 # - Ubuntu 22.04 (Jammy) and variants
+# - Debian 13 (Trixie) and variants
 # - Debian 12 (Bookworm) and variants
 # - Debian 11 (Bullseye) and variants
 # - EL9: Rocky Linux 9, RHEL 9, AlmaLinux 9, CentOS Stream 9
@@ -28,14 +30,16 @@
 # -----------------------------------------------------------------------------
 # Role execution control and basic service configuration
 
-
-# Which parts of the role to execute: 'all', 'install', 'config'
+# Which parts of the role to execute
+# Valid values: all, install, config
 openssh_role_action: "all"
 
 # Enable/disable SSH service on boot
+# Valid values: true, false
 openssh_service_enabled: true
 
 # Require explicit opt-in to stop/disable SSH over an SSH connection
+# Valid values: true, false
 openssh_allow_service_stop: false
 
 # -----------------------------------------------------------------------------
@@ -43,32 +47,76 @@ openssh_allow_service_stop: false
 # -----------------------------------------------------------------------------
 # Configuration settings for the SSH daemon/server (sshd_config)
 
+# Absolute path to the SSH daemon configuration file
+# Valid values: absolute filesystem path
 openssh_sshd_config_path: "/etc/ssh/sshd_config"
+
+# Directory holding sshd drop-in configuration fragments
+# Valid values: absolute filesystem path
 openssh_sshd_config_dir: "/etc/ssh/sshd_config.d"
+
+# Command used to validate a generated sshd configuration before it is applied
+# Valid values: shell command string containing a %s placeholder for the file path
 openssh_sshd_validate_command: '/usr/sbin/sshd -t -f %s'
+
+# TCP port the SSH daemon listens on
+# Valid values: integer 1-65535
 openssh_port: 22
+
+# IP addresses the daemon binds to; empty list binds to all interfaces
+# Valid values: list of IPv4 or IPv6 address strings
 openssh_listen_addresses: []
 
-# Forwarding — all disabled by default for security
+# Allow arbitrary TCP port forwarding through the SSH tunnel
+# Valid values: true, false (disabled by default; enabling permits pivoting into internal networks)
 openssh_tcp_forwarding: false
+
+# Allow forwarding of the client SSH authentication agent
+# Valid values: true, false (disabled by default; a compromised host can reuse forwarded agent keys)
 openssh_agent_forwarding: false
+
+# Allow tunnelling of X11 graphical sessions
+# Valid values: true, false (disabled by default; X11 forwarding exposes the client display)
 openssh_x11_forwarding: false
+
+# Allow creation of tun/tap layer-2 or layer-3 tunnel devices
+# Valid values: true, false (disabled by default; enabling grants VPN-like network access)
 openssh_permit_tunnel: false
-openssh_gateway_ports: "no"  # tri-state: 'yes', 'no', 'clientspecified'
+
+# Allow remote hosts to connect to locally forwarded ports
+# Valid values: yes, no, clientspecified
+openssh_gateway_ports: "no"
+
+# Disable all forwarding features regardless of the individual toggles above
+# Valid values: true, false (enabled by default as a defence-in-depth override)
 openssh_disable_forwarding: true
 
-# Banner and MOTD
+# Print the message of the day after a successful login
+# Valid values: true, false
 openssh_print_motd: true
+
+# Print the date and time of the last successful login
+# Valid values: true, false
 openssh_print_last_log: true
+
+# Path to the pre-authentication banner file displayed before login
+# Valid values: absolute filesystem path
 openssh_banner_path: "/etc/issue.net"
 
-# Session timeout (seconds)
+# Seconds of inactivity before the daemon sends a keepalive probe
+# Valid values: integer >= 0 (0 disables the probes)
 openssh_client_alive_interval: 180
+
+# Number of unanswered keepalive probes before the session is closed
+# Valid values: integer >= 1
 openssh_client_alive_count_max: 2
 
-# Connection limits
+# Maximum number of concurrent sessions permitted per network connection
+# Valid values: integer >= 1
 openssh_max_sessions: 5
-# Format: start:rate:full
+
+# Throttling of concurrent unauthenticated connections
+# Valid values: string in start:rate:full format
 openssh_max_startups: "10:30:60"
 
 # -----------------------------------------------------------------------------
@@ -76,34 +124,76 @@ openssh_max_startups: "10:30:60"
 # -----------------------------------------------------------------------------
 # Configuration settings for authentication methods and permissions
 
+# Whether the root account may log in over SSH
+# Valid values: yes, no, prohibit-password, forced-commands-only
 openssh_permit_root_login: "no"
+
+# Allow accounts with an empty password to authenticate
+# Valid values: true, false (disabled by default; enabling permits passwordless login)
 openssh_permit_empty_passwords: false
+
+# Allow password-based authentication
+# Valid values: true, false (disabled by default in favour of public key authentication)
 openssh_password_authentication: false
+
+# Allow public key authentication
+# Valid values: true, false
 openssh_pubkey_authentication: true
+
+# Allow host-based authentication using client host keys
+# Valid values: true, false (disabled by default; trust is delegated to the client host)
 openssh_host_based_auth: false
+
+# Ignore per-user .rhosts and .shosts files during host-based authentication
+# Valid values: true, false (enabled by default so user-owned files cannot grant trust)
 openssh_ignore_rhosts: true
 
-# KbdInteractiveAuthentication (renamed from ChallengeResponseAuthentication,
-# deprecated in OpenSSH 8.7, bz#3303)
+# Allow keyboard-interactive authentication
+# Valid values: true, false (renamed from ChallengeResponseAuthentication, deprecated in OpenSSH 8.7, bz#3303)
 openssh_kbd_interactive_auth: false
 
-# Kerberos
+# Allow Kerberos authentication
+# Valid values: true, false
 openssh_kerberos_auth: false
+
+# Destroy the user Kerberos ticket cache on logout
+# Valid values: true, false
 openssh_kerberos_ticket_cleanup: true
 
-# GSSAPI
+# Allow GSSAPI-based authentication
+# Valid values: true, false
 openssh_gssapi_auth: false
+
+# Destroy delegated GSSAPI credentials on logout
+# Valid values: true, false
 openssh_gssapi_cleanup_credentials: true
 
+# Allow users to supply environment variables via ~/.ssh/environment
+# Valid values: true, false (disabled by default; user-set variables can bypass restricted shells)
 openssh_permit_user_environment: false
 
-# Access control lists (empty = no restriction)
+# Users permitted to log in; empty list applies no restriction
+# Valid values: list of username strings
 openssh_allow_users: []
+
+# Groups permitted to log in; empty list applies no restriction
+# Valid values: list of group name strings
 openssh_allow_groups: []
+
+# Users explicitly denied login; evaluated before the allow lists
+# Valid values: list of username strings
 openssh_deny_users: []
+
+# Groups explicitly denied login; evaluated before the allow lists
+# Valid values: list of group name strings
 openssh_deny_groups: []
 
+# Location of the per-user authorized keys file, relative to the home directory
+# Valid values: relative or absolute filesystem path
 openssh_authorized_keys_file: ".ssh/authorized_keys"
+
+# Maximum authentication attempts permitted per connection
+# Valid values: integer >= 1
 openssh_max_auth_tries: 3
 
 # -----------------------------------------------------------------------------
@@ -111,8 +201,16 @@ openssh_max_auth_tries: 3
 # -----------------------------------------------------------------------------
 # Networking, listen addresses, and family settings
 
+# Resolve client IP addresses to hostnames for logging and access control
+# Valid values: true, false (disabled by default; DNS lookups slow logins and can be spoofed)
 openssh_use_dns: false
-openssh_address_family: "any"  # 'inet', 'inet6', 'any'
+
+# IP protocol family the daemon accepts connections on
+# Valid values: any, inet, inet6
+openssh_address_family: "any"
+
+# Client environment variables the daemon accepts
+# Valid values: list of variable name strings, shell glob patterns allowed
 openssh_accept_env: ["LANG", "LC_*"]
 
 # -----------------------------------------------------------------------------
@@ -120,42 +218,62 @@ openssh_accept_env: ["LANG", "LC_*"]
 # -----------------------------------------------------------------------------
 # Cryptographic algorithms, ciphers, MACs, KEX, and system security policies
 
+# Require correct ownership and permissions on user files before accepting a login
+# Valid values: true, false (enabled by default; relaxing it allows world-writable key files)
 openssh_strict_modes: true
 
-# Only modern, secure ciphers
+# Symmetric ciphers offered by the daemon, in preference order
+# Valid values: list of cipher names supported by the installed OpenSSH build
 openssh_ciphers:
   - "chacha20-poly1305@openssh.com"
   - "aes256-gcm@openssh.com"
   - "aes128-gcm@openssh.com"
 
-# Only ETM (encrypt-then-MAC) variants
+# Message authentication codes offered by the daemon, in preference order
+# Valid values: list of MAC names; encrypt-then-MAC variants are preferred
 openssh_macs:
   - "hmac-sha2-512-etm@openssh.com"
   - "hmac-sha2-256-etm@openssh.com"
 
-# Only modern key exchange algorithms
+# Key exchange algorithms offered by the daemon, in preference order
+# Valid values: list of KEX algorithm names supported by the installed OpenSSH build
 openssh_kex_algorithms:
   - "curve25519-sha256@libssh.org"
   - "curve25519-sha256"
   - "diffie-hellman-group16-sha512"
   - "diffie-hellman-group18-sha512"
 
-# Host key algorithms — prioritize ED25519
+# Host key algorithms the daemon presents, in preference order
+# Valid values: list of host key algorithm names
 openssh_host_key_algorithms:
   - "ssh-ed25519"
   - "rsa-sha2-512"
   - "rsa-sha2-256"
 
+# Host key files the daemon loads
+# Valid values: list of absolute filesystem paths
 openssh_host_keys:
   - "/etc/ssh/ssh_host_rsa_key"
   - "/etc/ssh/ssh_host_ed25519_key"
 
-openssh_compression: "no"  # 'yes', 'no', 'delayed'
+# Compress the session stream
+# Valid values: yes, no, delayed
+openssh_compression: "no"
+
+# Seconds a client may take to authenticate before the connection is closed
+# Valid values: integer >= 0 (0 disables the time limit)
 openssh_login_grace_time: 60
+
+# Use PAM for account and session management
+# Valid values: true, false
 openssh_use_pam: true
 
-# SELinux booleans for OpenSSH
+# Allow SSH to write to home directories inside a chroot under SELinux
+# Valid values: true, false
 openssh_selinux_chroot_rw_homedirs: false
+
+# Allow login to the SELinux sysadm_r role over SSH
+# Valid values: true, false (disabled by default; grants an administrative SELinux role)
 openssh_selinux_sysadm_login: false
 
 # -----------------------------------------------------------------------------
@@ -163,7 +281,12 @@ openssh_selinux_sysadm_login: false
 # -----------------------------------------------------------------------------
 # SSH daemon logging verbosity and facility options
 
-openssh_log_level: "VERBOSE"  # QUIET, FATAL, ERROR, INFO, VERBOSE, DEBUG, DEBUG1-3
+# Verbosity of SSH daemon logging
+# Valid values: QUIET, FATAL, ERROR, INFO, VERBOSE, DEBUG, DEBUG1, DEBUG2, DEBUG3
+openssh_log_level: "VERBOSE"
+
+# Syslog facility the daemon logs under
+# Valid values: DAEMON, USER, AUTH, AUTHPRIV, LOCAL0-LOCAL7
 openssh_syslog_facility: "AUTH"
 
 # -----------------------------------------------------------------------------
@@ -171,9 +294,16 @@ openssh_syslog_facility: "AUTH"
 # -----------------------------------------------------------------------------
 # Configuration settings for the outbound SSH client (ssh_config)
 
+# Manage the system-wide outbound SSH client configuration
+# Valid values: true, false
 openssh_configure_client: true
+
+# Absolute path to the system-wide SSH client configuration file
+# Valid values: absolute filesystem path
 openssh_ssh_config_path: "/etc/ssh/ssh_config"
 
+# Outbound SSH client connection and host verification settings
+# Valid values: mapping of client option names to their values
 openssh_client_settings:
   connection_attempts: 2
   connect_timeout: 10
@@ -193,5 +323,7 @@ openssh_client_settings:
 # 8. Custom Settings
 # -----------------------------------------------------------------------------
 # Additional custom sshd_config options appended at the end
-# Additional sshd_config lines appended at the end of the configuration file
+
+# Raw sshd_config directives appended verbatim after all generated settings
+# Valid values: list of configuration line strings
 openssh_custom_options: []
