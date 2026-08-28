@@ -8,7 +8,7 @@
 - name: OpenSSH | handlers | Restart OpenSSH service
   become: true
   ansible.builtin.service:
-    name: "{{ openssh_service_name }}"
+    name: "{{ __openssh_service_name }}"
     state: restarted
   when: openssh_service_enabled | bool
   listen: "restart openssh"

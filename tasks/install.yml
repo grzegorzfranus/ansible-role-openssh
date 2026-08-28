@@ -7,5 +7,5 @@
 - name: OpenSSH | install | Install OpenSSH packages
   become: true
   ansible.builtin.package:
-    name: "{{ openssh_packages }}"
+    name: "{{ __openssh_packages }}"
     state: present
