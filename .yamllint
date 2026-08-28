@@ -1,14 +1,19 @@
 ---
 extends: default
-
 rules:
-  comments:
-    min-spaces-from-content: 1
-  comments-indentation: false
-  truthy: disable
   line-length:
     max: 200
     level: warning
+  truthy:
+    allowed-values: ["true", "false", "yes", "no"]
+  octal-values:
+    forbid-implicit-octal: true
+    forbid-explicit-octal: true
+  comments-indentation: false
+  # Retained: ansible-lint requires this value, otherwise --fix mode is disabled
+  comments:
+    min-spaces-from-content: 1
+  # Retained: ansible-lint requires max-spaces-inside 1, otherwise --fix mode is disabled
   braces:
     min-spaces-inside: 0
     max-spaces-inside: 1
@@ -16,10 +21,8 @@ rules:
   brackets:
     max-spaces-inside: 1
     level: error
-  octal-values:
-    forbid-implicit-octal: true
-    forbid-explicit-octal: true
 
+# Workflow files use GitHub Actions' `on:` key, which yamllint parses as a truthy value
 ignore: |
   .github/workflows/**
   molecule/**

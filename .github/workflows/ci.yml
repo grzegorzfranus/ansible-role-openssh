@@ -3,7 +3,7 @@ name: "CI"
 run-name: "CI: ${{ github.event.pull_request.title || github.ref_name }} by @${{ github.actor }}"
 
 on:
-  pull_request:
+  pull_request: {}
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -151,9 +151,10 @@ jobs:
   # ================================================================
   ci:
     needs: [branch-name-lint, pr-title-lint]
-    uses: grzegorzfranus/github-workflows/.github/workflows/ansible-ci.yml@v3.0.1
+    uses: grzegorzfranus/github-workflows/.github/workflows/ansible-ci.yml@main
     with:
-      molecule-distros: '["ubuntu2404", "ubuntu2204", "debian12", "debian11", "rockylinux9"]'
+      molecule-distros: '["ubuntu2604", "ubuntu2404", "ubuntu2204", "debian13", "debian12", "debian11", "rockylinux9"]'
+      molecule-scenarios: '["default"]'
 
   # ================================================================
   # 3. MERGE CHECK — Caller-level gate for branch protection

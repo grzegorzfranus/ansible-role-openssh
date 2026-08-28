@@ -1,5 +1,10 @@
 ---
-# RedHat-specific variables.
+# =============================================================================
+# Ansible Role: OpenSSH - RedHat Family Variables
+# =============================================================================
+# Internal constants for the RedHat OS family, loaded by the first_found
+# cascade in tasks/main.yml. Not intended to be overridden by users.
+# =============================================================================
 
 # Package names
 openssh_packages:

@@ -1,4 +1,10 @@
 ---
+# =============================================================================
+# Ansible Role: OpenSSH - Argument Specifications
+# =============================================================================
+# Declarative input specification validated by Ansible before the role runs.
+# Runtime-only checks (regex, cross-field logic) live in tasks/assert.yml.
+# =============================================================================
 argument_specs:
   main:
     short_description: Install and configure OpenSSH server and client with security hardening.

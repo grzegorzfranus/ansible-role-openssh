@@ -1,7 +1,7 @@
 # Ansible Role: OpenSSH
 
 |Source|Version|CI|License|
-|------|-------|-------|-------|
+|------|-------|--|-------|
 |[![Source Code](https://img.shields.io/badge/source-github-blue.svg)](https://github.com/grzegorzfranus/ansible-role-openssh)|[![Version](https://img.shields.io/github/v/release/grzegorzfranus/ansible-role-openssh)](https://github.com/grzegorzfranus/ansible-role-openssh/releases)|[![CI](https://github.com/grzegorzfranus/ansible-role-openssh/actions/workflows/ci.yml/badge.svg)](https://github.com/grzegorzfranus/ansible-role-openssh/actions/workflows/ci.yml)|[![Repository License](https://img.shields.io/badge/license-apache2.0-brightgreen.svg)](LICENSE)|
 
 This Ansible role installs and configures OpenSSH, a secure and widely-used implementation of the SSH protocol for both server and client functionality. It provides enterprise-grade security hardening by default while maintaining operational flexibility for various deployment scenarios.
@@ -72,8 +72,10 @@ List of officially supported operating systems for this role:
 
 | OS Family | Version | Status |
 |-----------|---------|---------|
+| Ubuntu | 26.04 (Resolute) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Ubuntu | 24.04 (Noble) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Ubuntu | 22.04 (Jammy) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
+| Debian | 13 (Trixie) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 12 (Bookworm) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | Debian | 11 (Bullseye) | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
 | EL (RHEL, Rocky, Alma, Oracle) | 9 | ![✓](https://img.shields.io/badge/✓-brightgreen.svg) |
@@ -82,7 +84,7 @@ List of officially supported operating systems for this role:
 
 ### Ansible version
 
-Ansible >= 2.15
+Ansible >= 2.16
 
 ### Python version
 
@@ -437,10 +439,6 @@ sudo netstat -tnpa | grep 'ESTABLISHED.*:22'
 - Validation of variables and algorithm queries run in check mode.
 - Mutating actions (modifying configuration files, restarting services) are safely skipped in check mode.
 
-## 🏷️ Tags usage
-
-- Use `--tags` to select execution path: `validate`, `install`, `configure`, `selinux`, `requirements`.
-
 ## 🌐 Network resilience
 
 - OpenSSH server binds to TCP port 22 (or custom specified via `openssh_port`). Ensure that host firewalls (like ufw, firewalld, nftables) and cloud security groups are configured to allow incoming traffic on the specified TCP port.
@@ -534,12 +532,16 @@ ansible-role-openssh/
 | `configure` | SSH server and client configuration tasks |
 | `validate` | Variable validation and system compatibility checks |
 
+Use `--tags` to select the execution path, for example `--tags configure` to reapply configuration without reinstalling packages.
+
 ## 🧪 Testing
 
 This role includes comprehensive Molecule tests that validate functionality across all supported operating systems:
 
+- **Ubuntu 26.04 LTS** - Complete functionality testing
+- **Ubuntu 24.04 LTS** - Complete functionality testing
 - **Ubuntu 22.04 LTS** - Complete functionality testing
-- **Ubuntu 24.04 LTS** - Complete functionality testing  
+- **Debian 13** - Complete functionality testing
 - **Debian 12** - Complete functionality testing
 - **Debian 11** - Complete functionality testing
 - **Rocky Linux 9** - Complete functionality testing
@@ -573,9 +575,9 @@ The test suite verifies:
 
 ## CI/CD Pipeline
 
-This repository uses centralized, reusable GitHub Actions workflows from [grzegorzfranus/github-workflows](https://github.com/grzegorzfranus/github-workflows) (`v3.0.1`) for quality assurance, security scanning, and release automation.
+This repository uses centralized, reusable GitHub Actions workflows from [grzegorzfranus/github-workflows](https://github.com/grzegorzfranus/github-workflows) for quality assurance, security scanning, and release automation.
 
-### CI Pipeline (`ansible-ci.yml@v3.0.1`)
+### CI Pipeline (`ansible-ci.yml`)
 
 Runs on every Pull Request in a two-tier gate pattern:
 
@@ -585,17 +587,17 @@ Runs on every Pull Request in a two-tier gate pattern:
 4. **Ansible Lint** — checks Ansible best practices and role standards
 5. **Galaxy Metadata Validation** — verifies `meta/main.yml` schema and requirements (`ansible-meta-validate.yml`)
 6. **Security Scanning** — TruffleHog secret detection and Trivy IaC scanning (`ansible-security.yml`)
-7. **Molecule Integration Tests** — executes Molecule test matrix across Ubuntu 24.04, Ubuntu 22.04, Debian 12, Debian 11, and Rocky Linux 9 (`ansible-molecule.yml`)
+7. **Molecule Integration Tests** — executes Molecule test matrix across Ubuntu 26.04, Ubuntu 24.04, Ubuntu 22.04, Debian 13, Debian 12, Debian 11, and Rocky Linux 9 (`ansible-molecule.yml`)
 8. **Merge Check Gate** — single authoritative status check aggregating all results for branch protection
 
-### Release & Publish Pipeline (`ansible-publish.yml@v3.0.1`)
+### Release & Publish Pipeline (`ansible-publish.yml`)
 
 Automated via [Release Please](https://github.com/googleapis/release-please):
 
 1. **Push to `main`** → Release Please creates or updates a Release PR with automated changelog generation
 2. **Release PR Validation** → validates YAML syntax and actions schema before setting `Merge Check` status
 3. **Merge Release PR** → creates Git version tag and GitHub Release automatically
-4. **Ansible Galaxy Publish** → publishes tagged release to Ansible Galaxy via `ansible-publish.yml@v3.0.1` with exponential backoff retry logic
+4. **Ansible Galaxy Publish** → publishes tagged release to Ansible Galaxy via `ansible-publish.yml` with exponential backoff retry logic
 
 ## Example Playbooks
 
@@ -721,20 +723,22 @@ Contributions, bug reports, and feature requests are welcome!
 
 - Fork the repository and create your branch from `main`
 - Use [Conventional Commits](https://www.conventionalcommits.org/) for commit messages:
-  - `feat:` — new features (minor version bump)
-  - `fix:` — bug fixes (patch version bump)
-  - `docs:` — documentation changes
+  - `feat:` — new features
+  - `fix:` — bug fixes
   - `refactor:` — code refactoring
-  - `test:` — test additions
-  - `ci:` — CI/CD changes
+  - `docs:` — documentation changes
+  - `ci:` — CI/CD pipeline updates
+  - `build:` — dependency and build configuration updates
   - `chore:` — maintenance tasks
-- Use branch naming convention: `feature/`, `bugfix/`, `hotfix/`, `docs/`, `refactor/`, `test/`, `chore/`, `ci/`
-- Centralized workflows from [github-workflows](https://github.com/grzegorzfranus/github-workflows) version `v3.0.1` are used to run CI/CD pipelines
+  - `test:` — test additions or corrections
+  - `perf:` — performance improvements
+  - `revert:` — code reverts
+  - `style:` — code formatting and style
+- Use branch naming convention: `feature/`, `bugfix/`, `fix/`, `hotfix/`, `release/`, `chore/`, `docs/`, `refactor/`, `test/`, `build/`, `ci/`, `perf/`, `revert/`
 - Ensure your code passes all CI checks (YAML lint, Ansible lint, Molecule tests)
-- Submit a pull request describing your changes
-- For major changes, please open an issue first to discuss what you would like to change
-
-If you have questions or suggestions, feel free to open an issue or contact the author via GitHub.
+- Centralized workflows from [github-workflows](https://github.com/grzegorzfranus/github-workflows) are used to run CI/CD pipelines
+- Submit a pull request describing your changes (a template is available under `.github/PULL_REQUEST_TEMPLATE/pull_request_template.md` to help structure your PR description)
+- For major changes, please open an issue first to discuss what you would like to change (issue templates for bug reports, feature requests, and tasks are available under `.github/ISSUE_TEMPLATE/`)
 
 ## 📝 License
 
