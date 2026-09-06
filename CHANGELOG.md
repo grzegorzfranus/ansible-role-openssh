@@ -5,6 +5,13 @@ All notable changes to this OpenSSH role will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.2](https://github.com/grzegorzfranus/ansible-role-openssh/compare/v3.0.1...v3.0.2) (2026-09-06)
+
+
+### Bug Fixes
+
+* repair broken checks in molecule verification playbook ([#33](https://github.com/grzegorzfranus/ansible-role-openssh/issues/33)) ([d3c0fef](https://github.com/grzegorzfranus/ansible-role-openssh/commit/d3c0fef591d6a530496349c92ac7fd44e0653dd2))
+
 ## [3.0.1](https://github.com/grzegorzfranus/ansible-role-openssh/compare/v3.0.0...v3.0.1) (2026-08-28)
 
 
