@@ -60,7 +60,7 @@ This role requires the following Ansible collections:
 | Collection | Purpose |
 |------------|---------|
 | `ansible.posix` | SELinux boolean management (`seboolean`) |
-| `community.general` | SELinux context/port management (`sefcontext`, `seport`) |
+| `community.general` | SELinux port management (`seport`) |
 
 Install with:
 ```bash

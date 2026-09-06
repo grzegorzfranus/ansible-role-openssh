@@ -59,12 +59,11 @@
     __openssh_selinux_mode | default(false)
   block:
 
-    - name: "OpenSSH | selinux | Ensure SELinux file context for SSH configuration"
-      become: true
-      community.general.sefcontext:
-        target: "/etc/ssh(/.*)?"
-        setype: ssh_config_t
-        state: present
+    # No custom fcontext rule is defined for /etc/ssh. The distribution SELinux policy is
+    # authoritative here: it labels /etc/ssh and /etc/ssh/sshd_config as etc_t, while the host
+    # keys (/etc/ssh/ssh_host.*_key, /etc/ssh/primes) carry the dedicated sshd_key_t type. A
+    # blanket "/etc/ssh(/.*)?" local rule would take precedence over those policy entries and
+    # relabel the host keys, breaking sshd on enforcing systems.
 
     # Justification: Use command module because dry-running restorecon context checking
     # requires running 'restorecon' CLI tool with specific flags, which has no native Ansible module.
