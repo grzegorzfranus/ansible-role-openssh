@@ -48,18 +48,22 @@
       register: _binary_result_
       ignore_errors: true
 
+    # Justification: Use command module because reporting the sshd version requires the
+    # 'sshd' binary itself, which has no native Ansible module. There is no flag that exits
+    # zero across the supported releases: OpenSSH 9.9 accepts -V, while OpenSSH 8.4 on
+    # Debian 11 rejects it and prints usage. Every release still emits the version banner,
+    # so the return code is not a usable signal and the banner is selected from the combined
+    # output instead.
     - name: Verify | Get OpenSSH version
       ansible.builtin.command:
-        cmd: sshd -v
+        cmd: sshd -V
       register: _version_result_
       changed_when: false
-      ignore_errors: true
+      failed_when: false
 
     - name: Verify | Show OpenSSH version
       ansible.builtin.debug:
-        var: _version_result_.stderr
-      when: >
-        _version_result_.rc == 0
+        msg: "{{ ((_version_result_.stdout_lines | default([])) + (_version_result_.stderr_lines | default([]))) | select('search', '^OpenSSH_') | first | default('version banner not reported') }}"
 
     # 3. Service Status Verification
     - name: Verify | Check if sshd service is running
@@ -125,27 +129,39 @@
       ignore_errors: true
 
     # 6. Port Verification
-    - name: Verify | Check if SSH port is listening
+    # Justification: Use command module because listing listening sockets requires the
+    # 'ss' CLI tool, which has no native Ansible module. The pipeline that used to filter
+    # this output was passed to the command module verbatim and parsed by ss as a socket
+    # filter expression, so the task always failed; matching is now done in Jinja instead.
+    - name: Verify | Collect listening TCP sockets
       ansible.builtin.command:
-        cmd: "ss -tunlp | grep '{{ openssh_port }}'"
+        cmd: ss -tlnH
       register: _port_check_
       changed_when: false
       ignore_errors: true
 
+    - name: Verify | Determine whether the SSH port is listening
+      ansible.builtin.set_fact:
+        _port_listening_: "{{ _port_check_.stdout_lines | default([]) | select('search', ':' ~ openssh_port ~ '\\b') | list | length > 0 }}"
+
     - name: Verify | Display SSH port status
       ansible.builtin.debug:
-        msg: "SSH port {{ openssh_port }} is {{ _port_check_.rc == 0 | ternary('open', 'closed') }}"
+        msg: "SSH port {{ openssh_port }} is {{ _port_listening_ | ternary('open', 'closed') }}"
 
     # 7. Test Results Summary
+    # Every check is parenthesised before it reaches ternary. In Jinja the '|' filter binds
+    # tighter than both 'not' and '==', so the previous unparenthesised forms applied ternary
+    # to a bare literal and compared the result against the register, rendering False on every
+    # line regardless of the actual host state.
     - name: Verify | Summarize test results
       ansible.builtin.debug:
         msg: |
           OpenSSH Verification Summary:
           ----------------------------
-          Package Installed: {{ not _package_result_.changed | ternary('PASS', 'FAIL') }}
-          Binary Available: {{ _binary_result_.rc | default(1) == 0 | ternary('PASS', 'FAIL') }}
-          Service Running: {{ _service_result_.changed | default(true) == false | ternary('PASS', 'FAIL') }}
-          Service Enabled: {{ _service_enabled_result_.changed | default(true) == false | ternary('PASS', 'FAIL') }}
-          Config File Exists: {{ _config_file_result_.stat.exists | default(false) | ternary('PASS', 'FAIL') }}
-          Config Permissions: {{ _config_ownership_.changed | default(true) == false | ternary('PASS', 'FAIL') }}
-          SSH Port Listening: {{ _port_check_.rc | default(1) == 0 | ternary('PASS', 'FAIL') }}
+          Package Installed: {{ (not (_package_result_.changed | default(true))) | ternary('PASS', 'FAIL') }}
+          Binary Available: {{ ((_binary_result_.rc | default(1)) == 0) | ternary('PASS', 'FAIL') }}
+          Service Running: {{ ((_service_result_.changed | default(true)) == false) | ternary('PASS', 'FAIL') }}
+          Service Enabled: {{ ((_service_enabled_result_.changed | default(true)) == false) | ternary('PASS', 'FAIL') }}
+          Config File Exists: {{ (_config_file_result_.stat.exists | default(false)) | ternary('PASS', 'FAIL') }}
+          Config Permissions: {{ ((_config_ownership_.changed | default(true)) == false) | ternary('PASS', 'FAIL') }}
+          SSH Port Listening: {{ (_port_listening_ | default(false)) | ternary('PASS', 'FAIL') }}
