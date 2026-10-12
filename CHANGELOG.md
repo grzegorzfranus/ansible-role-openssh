@@ -5,6 +5,13 @@ All notable changes to this OpenSSH role will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.0.4](https://github.com/grzegorzfranus/ansible-role-openssh/compare/v3.0.3...v3.0.4) (2026-10-12)
+
+
+### Miscellaneous
+
+* **openssh:** drop Debian 11 after the end of its LTS ([#39](https://github.com/grzegorzfranus/ansible-role-openssh/issues/39)) ([fa86dbf](https://github.com/grzegorzfranus/ansible-role-openssh/commit/fa86dbfc475cdc4b4272c948f9731628c9a90cf8))
+
 ## [3.0.3](https://github.com/grzegorzfranus/ansible-role-openssh/compare/v3.0.2...v3.0.3) (2026-09-06)
 
 
