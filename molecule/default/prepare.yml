@@ -20,11 +20,10 @@
       ansible.builtin.debug:
         var: etc_shadow.stdout
 
-    # Always refresh: a container image can ship package lists that are recent by timestamp but point at versions the
-    # security mirror has already replaced (404 on fetch), so a cache_valid_time window is not enough here
     - name: Prepare | Update package cache (Debian)
       ansible.builtin.apt:
         update_cache: true
+        cache_valid_time: 3600
       when: >
         ansible_os_family is defined and ansible_os_family == "Debian"
       ignore_errors: true
