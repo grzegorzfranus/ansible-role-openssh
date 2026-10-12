@@ -148,7 +148,35 @@
       ansible.builtin.debug:
         msg: "SSH port {{ openssh_port }} is {{ _port_listening_ | ternary('open', 'closed') }}"
 
-    # 7. Test Results Summary
+    # 7. Foreign Drop-in Cleanup Verification
+    - name: Verify | Check if unowned drop-in file exists
+      ansible.builtin.stat:
+        path: /etc/ssh/sshd_config.d/50-test-foreign.conf
+      register: _foreign_dropin_stat_
+
+    # Justification: Use command module because testing sshd configuration syntax requires running
+    # the 'sshd' binary itself with '-t', which has no native Ansible module.
+    - name: Verify | Test sshd configuration syntax
+      ansible.builtin.command:
+        cmd: sshd -t
+      changed_when: false
+      register: _sshd_syntax_check_
+
+    - name: Verify | Assert unowned drop-in was removed
+      ansible.builtin.assert:
+        that:
+          - not _foreign_dropin_stat_.stat.exists
+        fail_msg: "Unowned drop-in /etc/ssh/sshd_config.d/50-test-foreign.conf still exists"
+        success_msg: "Unowned drop-in /etc/ssh/sshd_config.d/50-test-foreign.conf does not exist"
+
+    - name: Verify | Assert sshd configuration syntax test passed
+      ansible.builtin.assert:
+        that:
+          - _sshd_syntax_check_.rc == 0
+        fail_msg: "sshd -t configuration syntax test failed"
+        success_msg: "sshd -t configuration syntax test returned rc 0"
+
+    # 8. Test Results Summary
     # Every check is parenthesised before it reaches ternary. In Jinja the '|' filter binds
     # tighter than both 'not' and '==', so the previous unparenthesised forms applied ternary
     # to a bare literal and compared the result against the register, rendering False on every
@@ -165,3 +193,5 @@
           Config File Exists: {{ (_config_file_result_.stat.exists | default(false)) | ternary('PASS', 'FAIL') }}
           Config Permissions: {{ ((_config_ownership_.changed | default(true)) == false) | ternary('PASS', 'FAIL') }}
           SSH Port Listening: {{ (_port_listening_ | default(false)) | ternary('PASS', 'FAIL') }}
+          Dropin Removed: {{ (not (_foreign_dropin_stat_.stat.exists | default(true))) | ternary('PASS', 'FAIL') }}
+          Syntax Check (sshd -t): {{ ((_sshd_syntax_check_.rc | default(1)) == 0) | ternary('PASS', 'FAIL') }}

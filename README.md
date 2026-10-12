@@ -195,6 +195,7 @@ Customize for specific security requirements:
 |----------|-------------|---------|
 | `openssh_sshd_config_path` | SSH daemon configuration file path | `"/etc/ssh/sshd_config"` |
 | `openssh_sshd_config_dir` | SSH daemon configuration directory for drop-in files | `"/etc/ssh/sshd_config.d"` |
+| `openssh_sshd_config_dropins_absent` | List of unowned drop-in file names to remove from drop-in directory | `[]` |
 | `openssh_port` | SSH daemon port | `22` |
 | `openssh_sshd_validate_command` | Command used to validate sshd config (string with %s path placeholder) | `'/usr/sbin/sshd -t -f %s'` |
 | `openssh_listen_addresses` | List of IP addresses to listen on (empty for all) | `[]` |
@@ -440,6 +441,19 @@ sudo netstat -tnpa | grep 'ESTABLISHED.*:22'
 
 - Use Ansible Vault for any sensitive custom settings or keys.
 - Configuration templates enforce strict file permissions (`0600` for host keys, `0600` for sshd_config).
+
+### Removing drop-ins the role does not own
+
+Some cloud environments or distributions place drop-in configuration files into `/etc/ssh/sshd_config.d/` (such as
+cloud-init's `50-cloud-init.conf`, which may enable `PasswordAuthentication yes`). Although the role includes drop-ins
+at the end of `sshd_config` so the role's primary configuration directives take precedence, unmanaged drop-ins can be
+misleading and would take effect if configuration ordering changes.
+
+To remove unowned or third-party drop-ins, specify their file names in `openssh_sshd_config_dropins_absent`:
+
+```yaml
+openssh_sshd_config_dropins_absent: ["50-cloud-init.conf"]
+```
 
 ## 🧪 Check mode behavior
 

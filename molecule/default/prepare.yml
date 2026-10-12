@@ -66,6 +66,22 @@
         mode: '0755'
       ignore_errors: true
 
+    - name: Prepare | Ensure SSH drop-in directory exists
+      ansible.builtin.file:
+        path: /etc/ssh/sshd_config.d
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Prepare | Write unowned test drop-in configuration file
+      ansible.builtin.copy:
+        dest: /etc/ssh/sshd_config.d/50-test-foreign.conf
+        content: "PasswordAuthentication yes\n"
+        mode: '0600'
+        owner: root
+        group: root
+
     - name: Prepare | Check if RSA key exists
       ansible.builtin.stat:
         path: /etc/ssh/ssh_host_rsa_key
