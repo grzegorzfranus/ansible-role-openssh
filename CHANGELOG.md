@@ -5,6 +5,13 @@ All notable changes to this OpenSSH role will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0](https://github.com/grzegorzfranus/ansible-role-openssh/compare/v3.0.4...v3.1.0) (2026-10-12)
+
+
+### Features
+
+* **openssh:** remove sshd drop-ins the role does not own ([#37](https://github.com/grzegorzfranus/ansible-role-openssh/issues/37)) ([e5b8fb5](https://github.com/grzegorzfranus/ansible-role-openssh/commit/e5b8fb5eacae2695a83d3c3536f58d60d9c4f48a))
+
 ## [3.0.4](https://github.com/grzegorzfranus/ansible-role-openssh/compare/v3.0.3...v3.0.4) (2026-10-12)
 
 
