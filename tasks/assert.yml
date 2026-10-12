@@ -61,6 +61,24 @@
     fail_msg: "Invalid sshd config directory '{{ openssh_sshd_config_dir | default('undefined') }}'. Must be a valid directory path string"
     success_msg: "SSH daemon config directory is valid: {{ openssh_sshd_config_dir }}"
 
+# Validate that absent sshd drop-ins list contains valid file names and no directory traversal or path separators.
+- name: OpenSSH | assert | Validate unowned sshd drop-ins absent
+  ansible.builtin.assert:
+    that:
+      - openssh_sshd_config_dropins_absent is defined
+      - openssh_sshd_config_dropins_absent is sequence
+      - openssh_sshd_config_dropins_absent is not string
+      - openssh_sshd_config_dropins_absent is not mapping
+      - openssh_sshd_config_dropins_absent | reject('string') | list | length == 0
+      - openssh_sshd_config_dropins_absent | select('equalto', '') | list | length == 0
+      - openssh_sshd_config_dropins_absent | select('search', '/') | list | length == 0
+      - openssh_sshd_config_dropins_absent | select('in', ['.', '..']) | list | length == 0
+    fail_msg: >-
+      Invalid openssh_sshd_config_dropins_absent setting.
+      Must be a list of non-empty file names without '/' and not '.' or '..'
+    success_msg: >-
+      Absent sshd drop-ins list is valid with {{ openssh_sshd_config_dropins_absent | length }} entries
+
 - name: OpenSSH | assert | Validate sshd validate command
   ansible.builtin.assert:
     that:

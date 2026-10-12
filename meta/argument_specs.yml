@@ -45,6 +45,12 @@ argument_specs:
         type: str
         default: "/etc/ssh/sshd_config.d"
 
+      openssh_sshd_config_dropins_absent:
+        description: List of drop-in configuration file names inside openssh_sshd_config_dir to remove.
+        type: list
+        elements: str
+        default: []
+
       openssh_sshd_validate_command:
         description: Command used to validate sshd_config before applying. Must contain %s placeholder.
         type: str

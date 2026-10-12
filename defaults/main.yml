@@ -54,6 +54,13 @@ openssh_sshd_config_path: "/etc/ssh/sshd_config"
 # Valid values: absolute filesystem path
 openssh_sshd_config_dir: "/etc/ssh/sshd_config.d"
 
+# File names (not paths) inside openssh_sshd_config_dir to delete, for drop-ins the role does not own
+# (e.g. cloud-init's 50-cloud-init.conf which may set PasswordAuthentication yes). The role's own values
+# win today because Include comes last in sshd_config and sshd keeps the first value, but a leftover drop-in
+# misleads and would take effect if that order changed.
+# Valid values: list of file name strings (basename only)
+openssh_sshd_config_dropins_absent: []
+
 # Command used to validate a generated sshd configuration before it is applied
 # Valid values: shell command string containing a %s placeholder for the file path
 openssh_sshd_validate_command: '/usr/sbin/sshd -t -f %s'

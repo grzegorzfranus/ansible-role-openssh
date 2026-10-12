@@ -17,6 +17,17 @@
     validate: "{{ openssh_sshd_validate_command | default('/usr/sbin/sshd -t -f %s') }}"
   notify: restart openssh
 
+# Remove unowned or leftover drop-in configuration files that could override intended security settings.
+- name: OpenSSH | configure | Remove sshd drop-ins the role does not own
+  become: true
+  ansible.builtin.file:
+    path: "{{ openssh_sshd_config_dir }}/{{ item }}"
+    state: absent
+  loop: "{{ openssh_sshd_config_dropins_absent }}"
+  loop_control:
+    label: "{{ item }}"
+  notify: restart openssh
+
 - name: OpenSSH | configure | Deploy SSH client configuration
   become: true
   ansible.builtin.template:

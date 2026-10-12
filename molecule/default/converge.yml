@@ -41,6 +41,7 @@
     openssh_config_owner: root
     openssh_config_group: root
     openssh_config_mode: '0600'
+    openssh_sshd_config_dropins_absent: ["50-test-foreign.conf"]
 
   roles:
     - role: ../../..
