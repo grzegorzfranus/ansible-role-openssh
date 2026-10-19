@@ -5,6 +5,13 @@ All notable changes to this OpenSSH role will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.3](https://github.com/grzegorzfranus/ansible-role-openssh/compare/v3.1.2...v3.1.3) (2026-10-19)
+
+
+### CI/CD
+
+* **release:** delete the release PR's CI run before the Merge Check Gate status ([#48](https://github.com/grzegorzfranus/ansible-role-openssh/issues/48)) ([#49](https://github.com/grzegorzfranus/ansible-role-openssh/issues/49)) ([9f508a5](https://github.com/grzegorzfranus/ansible-role-openssh/commit/9f508a5648c24303544e06d60f82c49561cf1122))
+
 ## [3.1.2](https://github.com/grzegorzfranus/ansible-role-openssh/compare/v3.1.1...v3.1.2) (2026-10-18)
 
 
